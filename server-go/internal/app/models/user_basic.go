@@ -1,25 +1,29 @@
 package models
 
-import "github.com/jinzhu/gorm"
+import (
+	"github.com/jinzhu/gorm"
+	"time"
+)
 
 type UserBasic struct {
 	gorm.Model
-	Id            int64
+	ID            int64
 	Name          string
 	PassWord      string
 	Phone         string
 	Email         string
+	Salt          string
 	Identity      string
 	ClientIp      string
 	ClientPort    uint
-	LoginTime     uint64
-	HeartbeatTime uint64
-	LogOutTime    uint64
+	LoginTime     time.Time
+	HeartbeatTime time.Time
+	LoginOutTime  time.Time
 	IsLogout      bool
 	IsAdmin       bool
 	DeviceInfo    string
 }
 
 func (u *UserBasic) TableName() string {
-	return ""
+	return "user_basic"
 }
