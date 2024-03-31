@@ -1,8 +1,20 @@
 package router
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"server-go/internal/app/core/config"
+	"server-go/internal/app/middleware"
+	"server-go/internal/app/router"
+)
 
-func Router() *gin.Engine {
+func InitRouter() {
 	r := gin.Default()
-	return r
+	r.Use(gin.Logger())
+	r.Use(gin.Recovery())
+	r.Use(middleware.Cors())
+	group := r.Group("api")
+	router.InitAppRouter(group)
+	r.Run(fmt.Sprintf(":%d", config.Instance().Server.Port))
+	return
 }

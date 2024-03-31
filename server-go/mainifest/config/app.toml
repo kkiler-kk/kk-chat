@@ -1,0 +1,70 @@
+[server]
+port = 9345
+serverRoot = "resource/public"
+nameToUriType = 3
+maxHeaderBytes = "20KB"
+clientMaxBodySize = "50MB"
+logPath = "resource/log/server" # 日志文件存储目录路径，建议使用绝对路径。默认为空，表示关闭
+logStdout =  true               # 日志是否输出到终端。默认为true
+errorStack = true               # 当Server捕获到异常时是否记录堆栈信息到日志中。默认为true
+errorLogEnabled = true               # 是否记录异常日志信息到日志中。默认为true
+errorLogPattern = "error-{Ymd}.log"  # 异常错误日志文件格式。默认为"error-{Ymd}.log"
+accessLogEnabled = true              # 是否记录访问日志。默认为false
+accessLogPattern = "access-{Ymd}.log" # 访问日志文件格式。默认为"access-{Ymd}.log"
+
+[logger]
+path = 'resource/log/run'
+file = '{Y-m-d}.log'
+level = 'all'
+stdout = true
+
+[database]
+[database.logger]
+level = "all"
+stdout = true
+path = "resource/log/sql"
+[database.default]
+host = "127.0.0.1"
+port = 3306
+user = "root"
+pass = "admin"
+name = "chat"
+link = "root:admin@tcp(localhost:3306)/chat?charset=utf8mb4&parseTime=true&loc=Local"
+maxIdle = 10 # 连接池最大闲置的连接数
+maxOpen = 10 # 连接池最大打开连接数
+maxLifetime = "30s" # (单位秒) 连接对象可重复使用的时间长度
+
+[token]
+cacheKey="token:"
+timeOut = 10800
+maxRefresh = 5400
+multilLogin = true # 是否允许多个登录
+encryptKey =  "49c54195e750b04e74a8429b17896586"
+cacheModel = "redis"
+
+[redis]
+host = '127.0.0.1'
+port = 6379
+db = 2
+pass = ""
+idleTimeout = "60s" #连接最大空闲时间，使用时间字符串例如30s/1m/1d
+maxConnLifetime = "90s" #连接最长存活时间，使用时间字符串例如30s/1m/1d
+waitTimeout = "60s" #等待连接池连接的超时时间，使用时间字符串例如30s/1m/1d
+dialTimeout = "30s" #TCP连接的超时时间，使用时间字符串例如30s/1m/1d
+readTimeout = "30s" #TCP的Read操作超时时间，使用时间字符串例如30s/1m/1d
+writeTimeout = "30s" #TCP的Write操作超时时间，使用时间字符串例如30s/1m/1d
+maxActive = 100
+
+
+[system]
+notCheckAuthAdminIds = [1,2,31]  #无需验证后台权限的用户id
+dataDir = "./resource/data"
+[system.cache]
+model=  "redis"  #缓存模式 memory OR redis
+prefix = "chatCache:" #缓存前缀
+
+[mail]
+host = "smtp.163.com"
+username = "18857392027@163.com"
+password = "SPPSSXIWLAZYDEXA"
+port = 465
