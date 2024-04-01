@@ -5,7 +5,7 @@ import (
 	"gopkg.in/gomail.v2"
 	"server-go/internal/app/core/config"
 	"server-go/internal/app/core/email"
-	"server-go/internal/utility/utils"
+	"server-go/internal/common/utility/utils"
 )
 
 // SendEmailCode @Title 发送邮箱验证码

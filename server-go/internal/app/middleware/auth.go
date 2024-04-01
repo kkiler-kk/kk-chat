@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"server-go/internal/utility/authUtil"
+	"server-go/internal/common/utility/authUtil"
 	"strings"
 )
 
@@ -11,12 +11,17 @@ import (
 func AuthMiddlewareUpdate(c *gin.Context) {
 	authHeader := c.Request.Header.Get("Authorization")
 	if "" == authHeader {
-		c.JSON(http.StatusOK, gin.H{
-			"code": 2003,
-			"msg":  "请重新登录",
-		})
-		c.Abort()
-		return
+		authHeader = c.Query("token")
+		authHeader = "Bearer " + authHeader
+		if "" == authHeader || authHeader == "undefined" {
+
+			c.JSON(http.StatusOK, gin.H{
+				"code": 2003,
+				"msg":  "请重新登录",
+			})
+			c.Abort()
+			return
+		}
 	}
 	parts := strings.SplitN(authHeader, " ", 2)
 	if !(len(parts) == 2 && parts[0] == "Bearer") {

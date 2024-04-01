@@ -9,6 +9,8 @@ import store from "./store";
 // 导入antv组件库
 import antDesign from 'ant-design-vue';
 import "ant-design-vue/dist/antd.css";
+
+//挂载websocket
 const app = createApp(App)
 
 app.use(antDesign)

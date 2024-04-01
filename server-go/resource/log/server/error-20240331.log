@@ -35,3 +35,6 @@ created by server-go/internal/app/models.Start
 {"level":'error', "time": '2024-03-31 16:19:59', "msg":'handlerMsg 数据解析失败,err:invalid character 'e' looking for beginning of object key string, message:{event: 'hello', data:'world'}'}
 {"level":'error', "time": '2024-03-31 16:20:21', "msg":'handlerMsg 数据解析失败,err:invalid character 'e' looking for beginning of object key string, message:{event: 'hello', data:{'str':'str'}}'}
 {"level":'error', "time": '2024-03-31 16:20:24', "msg":'handlerMsg 数据解析失败,err:invalid character 'e' looking for beginning of object key string, message:{event: 'hello', data:{'str':'str'}}'}
+{"level":'error', "time": '2024-03-31 22:48:31', "msg":'handlerMsg request.Event is null'}
+{"level":'error', "time": '2024-03-31 23:28:16', "msg":'handlerMsg function id SendMessage: not registered'}
+{"level":'error', "time": '2024-03-31 23:28:39', "msg":'handlerMsg function id SendMessage: not registered'}

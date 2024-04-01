@@ -9,10 +9,10 @@ import (
 	"server-go/internal/app/dao"
 	"server-go/internal/app/models"
 	"server-go/internal/app/models/request"
+	"server-go/internal/common/utility/authUtil"
+	"server-go/internal/common/utility/redisUtil"
+	"server-go/internal/common/utility/utils"
 	"server-go/internal/consts"
-	"server-go/internal/utility/authUtil"
-	"server-go/internal/utility/redisUtil"
-	"server-go/internal/utility/utils"
 	"time"
 )
 
@@ -47,7 +47,7 @@ func (u *userBasicService) CreateUserBasic(c *gin.Context, input request.UserBas
 		return errors.New("id已经存在了！")
 	}
 	_, err = dao.UserBasic.Insert(userBasicModel)
-	redisUtil.Del(c, consts.CodeEmail+userBasicModel.Email) // 添加成功 删除邮箱验证码
+	_ = redisUtil.Del(c, consts.CodeEmail+userBasicModel.Email) // 添加成功 删除邮箱验证码
 	return
 }
 
@@ -64,6 +64,6 @@ func (u *userBasicService) Login(c *gin.Context, input request.UserBasicLoginReq
 	}
 	token, err = authUtil.GenToken(user.ID)
 	jsonStr, _ := json.Marshal(user)
-	redisUtil.Set(c, config.Instance().Token.CacheKey+token, string(jsonStr), config.Instance().Token.TimeOut*time.Minute)
+	_ = redisUtil.Set(c, config.Instance().Token.CacheKey+token, string(jsonStr), config.Instance().Token.TimeOut*time.Minute)
 	return token, err
 }

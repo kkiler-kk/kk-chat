@@ -5,8 +5,8 @@ import (
 	"server-go/internal/app/models/request"
 	"server-go/internal/app/models/response"
 	"server-go/internal/app/service"
-	"server-go/internal/utility/catchaGenerUtil"
-	"server-go/internal/utility/validate"
+	"server-go/internal/common/utility/catchaGenerUtil"
+	"server-go/internal/common/utility/validate"
 )
 
 var UserControl *userControl

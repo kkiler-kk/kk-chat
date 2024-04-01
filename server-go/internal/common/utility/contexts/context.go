@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"server-go/internal/app/core/config"
 	"server-go/internal/app/models"
-	"server-go/internal/utility/redisUtil"
+	"server-go/internal/common/utility/redisUtil"
 )
 
 func GetUser(c *gin.Context) *models.UserBasic {

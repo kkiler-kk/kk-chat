@@ -1,9 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 )
 
 func TestName(t *testing.T) {
-	// 以下是生成验证码的代码
+	fmt.Println("Hello World")
 }

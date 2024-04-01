@@ -201,7 +201,7 @@ func (manager *ClientManager) EventUnregister(client *Client) {
 		return
 	}
 
-	client.close()
+	client.Close()
 }
 
 // ClearTimeoutConnections 定时清理超时连接
