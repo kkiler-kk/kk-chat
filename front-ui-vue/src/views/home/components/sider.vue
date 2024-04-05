@@ -1,13 +1,12 @@
 <template>
   <div style="height: 100%;">
-    <div style="width: 15%;float:left;">
+    <div style="width: 15%; float:left;">
       <p>
         <a-image :src="logo" :width="44" />
       </p>
-
       <ul>
         <li>
-          <a-avatar :src="logo" size="large" @click="switComponents(UserInfo)" />
+          <a-avatar :src="userInfo.avatar" size="large" @click="switComponents(UserInfo)" />
         </li>
         <li>
           <a-avatar size="large" class="li" @click="switComponents(Message)">
@@ -16,13 +15,13 @@
         </li>
         <li>
           <a-avatar size="large" class="li" @click="switComponents(Contact)">
-            <template #icon><UserOutlined /></template>
+            <template #icon><ContactsFilled /></template>
           </a-avatar>
         </li>
 
         <li>
           <a-avatar size="large" class="li" @click="switComponents(Like)">
-            <template #icon><LikeFilled /></template>
+            <template #icon><fire-filled /></template>
           </a-avatar>
         </li>
         <li>
@@ -34,7 +33,7 @@
     </div>
     <div class="componet">
       <keep-alive include="Message" exclude="Setting">
-        <component :is="whichComponent"></component>
+        <component :is="whichComponent" @getValue="getValue"></component>
       </keep-alive>
     </div>
   </div>
@@ -45,6 +44,7 @@ import {
   SettingFilled,
   LikeFilled,
   UserOutlined,
+  FireFilled,
   ContactsFilled,
   MessageFilled,
 } from "@ant-design/icons-vue";
@@ -53,12 +53,33 @@ import Setting from "@/views/home/components/viewsSoder/setting.vue";
 import Like from "@/views/home/components/viewsSoder/like.vue";
 import Message from "@/views/home/components/viewsSoder/message.vue";
 import Contact from "@/views/home/components/viewsSoder/contact.vue";
-import { ref } from "vue";
+import { ref, onMounted,watch } from "vue";
+import { Session } from "@/utils/storage";
 const whichComponent = ref(UserInfo);
-
+const emit = defineEmits(['getValue'])
+const userInfo = ref<any>({
+  avatar: 'http://127.0.0.1:9345/resource/public/file/20240403/douwei.jpg'
+})
+const clickChat = ref<any>({name: 'hello'})
+onMounted(() => {
+  userInfo.value = Session.get('userInfo')
+  console.log('userInfo',userInfo.value)
+  if (userInfo.value == null){
+    return 
+  }
+  clickChat.value = new Object
+})
 function switComponents(componet) {
   whichComponent.value = componet;
 }
+const getValue = (value: any) => {  // 从子组件传出 当前点击的值
+  clickChat.value = value
+  emit('getValue', clickChat.value) // 传入父级组件 HomeView
+}
+// let stopWatch = watch(clickChat, (newVal, oldVal) => {
+//   console.log('newVal', newVal)
+//   console.log('oldVal', oldVal)
+// })
 </script>
 <style scoped>
 div {
@@ -89,5 +110,4 @@ ul li {
     border: 1px solid white;
     float: right;
 }
-
 </style>

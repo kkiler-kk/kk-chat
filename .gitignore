@@ -1,4 +1,5 @@
 server-go/resource/log/
-front-ui-vue/.vscode/
+server-go/.idea
+front-ui-vue/.vscode
 front-ui-vue/node_modules
 server-go/mainifest/config/app.toml

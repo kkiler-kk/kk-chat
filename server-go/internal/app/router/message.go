@@ -8,8 +8,7 @@ import (
 )
 
 func MessageRouter(r *gin.RouterGroup) {
-	message := r.Group("message") //, middleware.AuthMiddlewareUpdate
-	// 开启websocket manage
-	models.Start()
+	message := r.Group("message")                                                          //, middleware.AuthMiddlewareUpdate
+	models.Start()                                                                         // 开启websocket manage
 	message.GET("socket", middleware.AuthMiddlewareUpdate, control.MessageControl.Handler) // 用户建立websocket 连接登录
 }

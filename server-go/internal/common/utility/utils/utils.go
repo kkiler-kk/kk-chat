@@ -13,6 +13,13 @@ func EncryptPassword(password, salt string) string {
 	m.Write(d)
 	return hex.EncodeToString(m.Sum(nil))
 }
+
+func MD5(str string) string {
+	d := []byte(str)
+	m := md5.New()
+	m.Write(d)
+	return hex.EncodeToString(m.Sum(nil))
+}
 func RandStr(n int) string {
 	b := make([]rune, n)
 	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")

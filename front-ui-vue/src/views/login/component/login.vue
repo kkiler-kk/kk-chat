@@ -83,8 +83,9 @@ const formState = reactive<FormState>({
 
 const onFinish = (values: any) => {
   loginLoading.value = true
-  login(formState).then((res) => {
-    Session.set('token', res)
+  login(formState).then((res: any) => {
+    Session.set('token', res.token)
+    Session.set('userInfo', res.user)  // 将信息载入浏览器本地缓存
     loginLoading.value = false
     setTimeout(() => {
         router.push({

@@ -32,7 +32,7 @@
       <a-form-item
         label="邮箱"
         name="email"
-        :rules="[{ required: true, message: '请输入邮箱!' }]"
+        :rules="[{ required: true, message: '请输入邮箱!', pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,}]"
       >
         <a-input
           v-model:value="formState.email"

@@ -2,8 +2,10 @@ package models
 
 import (
 	"fmt"
+	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"runtime/debug"
+	"server-go/internal/common/utility"
 	"sync"
 	"time"
 )
@@ -70,6 +72,20 @@ func (manager *ClientManager) InClient(client *Client) (ok bool) {
 	defer manager.ClientsLock.RUnlock()
 	_, ok = manager.Clients[client]
 	return
+}
+
+// IdInClient 通过id 判断客户端是否存在 存在返回实例
+func (manager *ClientManager) IdInClient(id string) (result *Client, ok bool) {
+	manager.ClientsLock.RLock()
+	defer manager.ClientsLock.RUnlock()
+
+	//result, ok = manager.Clients[client]
+	for client, _ := range manager.Clients {
+		if client.ID == id {
+			return client, true
+		}
+	}
+	return nil, false
 }
 
 // GetClients 获取所有客户端
@@ -224,15 +240,21 @@ func (manager *ClientManager) ping() {
 			return
 		}
 	}()
+	c := cron.New(cron.WithSeconds())
 	////定时任务，发送心跳包
-	//cron.Add(ctxManager, "0 */1 * * * *", func(ctx context.Context) {
-	//	res := &WResponse{
-	//		Event:     "ping",
-	//		Timestamp: gtime.Now().Unix(),
-	//	}
-	//	SendToAll(res)
-	//})
+	c.AddFunc("0 */1 * * * *", func() {
+		res := &WResponse{
+			Event:     "ping",
+			Timestamp: time.Now().Unix(),
+		}
+		SendToAll(res)
+	})
 	// 定时任务，清理超时连接
+	c.AddFunc("*/30 * * * * *", func() {
+		manager.clearTimeoutConnections()
+	})
+	c.Start()
+
 	//gcron.Add(ctxManager, "*/30 * * * * *", func(ctx context.Context) {
 	//	manager.clearTimeoutConnections()
 	//})
@@ -247,12 +269,12 @@ func Start() {
 
 // 管道处理程序
 func (manager *ClientManager) start() {
-	//defer func() {
-	//	if r := recover(); r != nil {
-	//		log.Error().Msg(fmt.Sprintf("websocket start recover:%+v, stack:%+v", r, string(debug.Stack())))
-	//		return
-	//	}
-	//}()
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error().Msg(fmt.Sprintf("websocket start recover:%+v, stack:%+v", r, string(debug.Stack())))
+			return
+		}
+	}()
 	for {
 		select {
 		case conn := <-manager.Register:
@@ -274,15 +296,15 @@ func (manager *ClientManager) start() {
 			}
 		case message := <-manager.TagBroadcast:
 			// 标签广播事件
-			//clients := manager.GetClients()
-			//for conn := range clients {
-			//	if conn.Tags.Contains(message.Tag) {
-			//		if message.WResponse.Timestamp == 0 {
-			//			message.WResponse.Timestamp = time.Now().Unix()
-			//		}
-			//		conn.SendMsg(message.WResponse)
-			//	}
-			//}
+			clients := manager.GetClients()
+			for conn := range clients {
+				if utility.InArray(message.Tag, conn.Tags) {
+					if message.WResponse.Timestamp == 0 {
+						message.WResponse.Timestamp = time.Now().Unix()
+					}
+					conn.SendMsg(message.WResponse)
+				}
+			}
 			fmt.Println(message)
 		case message := <-manager.UserBroadcast:
 			// 用户广播事件
@@ -298,6 +320,7 @@ func (manager *ClientManager) start() {
 		case message := <-manager.ClientBroadcast:
 			// 单个客户端广播事件
 			clients := manager.GetClients()
+			fmt.Println("clients", clients)
 			for conn := range clients {
 				if conn.ID == message.ID {
 					if message.WResponse.Timestamp == 0 {
@@ -306,6 +329,7 @@ func (manager *ClientManager) start() {
 					conn.SendMsg(message.WResponse)
 				}
 			}
+			fmt.Printf("message: %+v\n", message)
 		case <-manager.closeSignal:
 			log.Error().Msg("websocket closeSignal quit..")
 			return

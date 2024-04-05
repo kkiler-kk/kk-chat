@@ -53,20 +53,43 @@ export function createSocket() {
             throw new Error('用户尚未登录， 请稍后重试。。。')
         }
         socket = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL + "?token=" + Session.get("token"))
-        console.log('wsAdd', import.meta.env.VITE_WEBSOCKET_URL)
         init()
     } catch (e) {
         console.log('createSocket err:' + e);
         reconnect(); // 重连一下websocket
     }
-    if (lockReconnect) {
-        lockReconnect = false;
-    }
+   
 };
+export function onMessage() {
+    if (socket == undefined || !isActive) {
+        console.log("socket连接异常，发送失败!")
+        return
+    }
+    try {
+        socket.onmessage = function (event) {
+            isActive = true;
+            console.log('WebSocket:收到一条消息', event.data);
+
+            let isHeart = false;
+            if (!isJsonString(event.data)) {
+                console.log('socket message incorrect format:' + JSON.stringify(event));
+                return;
+            }
+            const message = JSON.parse(event.data);
+            return message
+        }
+    } catch (err) {
+
+    }
+    return null
+}
 export function init() {
     socket.onopen = function (_) {
         console.log('WebSocket:已连接');
         isActive = true;
+        //心跳检测重置
+        heartCheck.start();
+        lockReconnect = true
     };
 
     socket.onmessage = function (event) {
@@ -91,34 +114,52 @@ export function init() {
         }
 
         // 通知
-      if (message.event === 'notice') {
+        if (message.event === 'notice') {
 
-      }
+        }
     }
 
     socket.onerror = function (_) {
         console.log('WebSocket:发生错误');
         reconnect();
         isActive = false;
-      };
-  
-      socket.onclose = function (_) {
+    };
+
+    socket.onclose = function (_) {
         console.log('WebSocket:已关闭');
         reconnect();
         isActive = false;
-      };
-  
-      window.onbeforeunload = function () {
+    };
+
+    window.onbeforeunload = function () {
         socket.close();
         isActive = false;
-      };
+    };
 };
 const reconnect = () => {
-    console.log('lockReconnect:' + lockReconnect);
     if (lockReconnect) return;
     lockReconnect = true;
-    clearTimeout(timer);
+    timer && clearTimeout(timer);
     timer = setTimeout(() => {
         createSocket();
-    }, 1000);
+        lockReconnect = false
+    }, 5000);
+}
+const heartCheck = {
+    timeout: 3000,
+    timeoutObj: null,
+    serverTimeoutObj: null,
+    start: function() {
+        var self = this;
+        this.timeoutObj && clearTimeout(this.timeoutObj)
+        this.serverTimeoutObj && clearTimeout(this.serverTimeoutObj)
+        this.timeoutObj = setTimeout(function(){
+            //这里发送一个心跳，后端收到后，返回一个心跳消息，
+            sendMsg("ping",null)
+            // self.serverTimeoutObj = setTimeout(function() {
+            //   socket.close();
+              // createWebSocket();
+            // }, self.timeout);
+        }, this.timeout)
+    },
 }

@@ -7,6 +7,7 @@ import (
 	"server-go/internal/app/core/config"
 	"server-go/internal/app/core/db"
 	"server-go/internal/app/core/log"
+	"server-go/internal/app/core/mongo"
 	"server-go/internal/app/core/redis"
 	"server-go/internal/router"
 )
@@ -31,6 +32,9 @@ func Init() {
 
 	// 初始化redis
 	redis.InitRedis()
+
+	// 初始化mongo
+	mongo.InitRedis()
 	// 初始化路由
 	router.InitRouter()
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
-	uuid "github.com/satori/go.uuid"
 	"runtime/debug"
 	"server-go/internal/common/utility/location"
 	"time"
@@ -52,7 +51,6 @@ type Client struct {
 func NewClient(c *gin.Context, socket *websocket.Conn, firstTime uint64) (client *Client) {
 	client = &Client{
 		Addr:          socket.RemoteAddr().String(),
-		ID:            uuid.NewV4().String(),
 		Socket:        socket,
 		Send:          make(chan *WResponse, 100),
 		SendClose:     false,

@@ -55,6 +55,12 @@ readTimeout = "30s" #TCP的Read操作超时时间，使用时间字符串例如3
 writeTimeout = "30s" #TCP的Write操作超时时间，使用时间字符串例如30s/1m/1d
 maxActive = 100
 
+[mongo]
+host = '127.0.0.1'
+port = 27017
+pass = ""
+maxPoolSize = 20
+minPoolSize = 10
 
 [system]
 notCheckAuthAdminIds = [1,2,31]  #无需验证后台权限的用户id

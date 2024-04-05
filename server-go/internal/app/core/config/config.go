@@ -12,6 +12,7 @@ type Conf struct {
 	Database Database `toml:"database"`
 	Token    Token    `toml:"token"`
 	Redis    Redis    `toml:"redis"`
+	Mongo    Mongo    `toml:"mongo"`
 	Mail     Mail     `toml:"mail"`
 	System   System   `toml:"system"`
 }
@@ -72,6 +73,7 @@ type Token struct {
 	EncryptKey  string        `toml:"encryptKey"`
 	CacheModel  string        `toml:"cacheModel"`
 }
+
 type Redis struct {
 	Host            string `toml:"host"`
 	Port            uint   `toml:"port"`
@@ -85,7 +87,13 @@ type Redis struct {
 	WriteTimeout    string `toml:"writeTimeout"`
 	MaxActive       uint   `toml:"maxActive"`
 }
-
+type Mongo struct {
+	Host        string  `toml:"host"`
+	Port        uint    `toml:"port"`
+	Pass        string  `toml:"pass"`
+	MaxPoolSize *uint64 `toml:"maxPoolSize"`
+	MinPoolSize *uint64 `toml:"minPoolSize"`
+}
 type System struct {
 	NotCheckAuthAdminIds []uint      `toml:"notCheckAuthAdminIds"`
 	DataDir              string      `toml:"dataDir"`

@@ -15,3 +15,24 @@ export function login(data){
         data: data,
     })
 }
+
+export function detail(id: string) {
+    return request({
+        url: '/api/app/user/detail/' + id,
+        method: 'post'
+    })
+}
+export function logout() {
+    return request({
+        url:"/api/app/user/logout",
+        method: 'post',
+    })
+}
+
+export function userSearch(data) {
+    return request({
+        url:"/api/app/user/search",
+        method:"post",
+        data: data,
+    })
+}

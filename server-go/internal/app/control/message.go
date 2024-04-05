@@ -12,6 +12,7 @@ import (
 	"server-go/internal/app/models"
 	"server-go/internal/app/models/response"
 	"server-go/internal/app/service"
+	_ "server-go/internal/app/service"
 	"server-go/internal/common/utility/redisUtil"
 	"time"
 )
@@ -43,6 +44,7 @@ func (u *messageControl) Handler(c *gin.Context) {
 	}
 	currentTime := uint64(time.Now().Unix())
 	client := models.NewClient(c, ws, currentTime)
+	client.ID = models.GetUserKey(user.ID) // 设置id
 	client.User = user
 	models.GetClientManager().Register <- client
 	go u.read(c, client)
@@ -121,7 +123,7 @@ func handlerMsg(c *gin.Context, client *models.Client, message []byte) {
 		return
 	}
 	fmt.Println(fmt.Sprintf("%+v", request))
-	fun, ok := service.MessageService.WebsocketFunMap[request.Event]
+	fun, ok := service.RoutersFun[request.Event]
 	if !ok {
 		log.Error().Msg(fmt.Sprintf("handlerMsg function id %v: not registered", request.Event))
 		return
