@@ -20,7 +20,7 @@
               <a-avatar
                 class="image"
                 :size="100"
-                :src="userInfo.avatar"
+                :src="userInfo?.avatar"
               />
               <h4>{{ userInfo.name }}</h4>
             </div>

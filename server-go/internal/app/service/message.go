@@ -30,6 +30,7 @@ func init() { // 初始化 websocket 路由
 	RoutersFun["recentChatList"] = MessageService.RecentChatList // 返回最近聊天消息列表
 	RoutersFun["sendMessage"] = MessageService.SendMessage       // 接收到客户端发送过来的消息
 	RoutersFun["ping"] = MessageService.Ping                     // 心跳
+	RoutersFun["messageList"] = MessageService.MessageList       // 返回消息列表
 }
 
 // RecentChatList @Title 返回最近的聊天列表
@@ -65,6 +66,7 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 		Event: "error",
 		Code:  500,
 	}
+	message.CreateTime = time.Now()
 	//m.RecentChatList(c, client, nil) // 刷新一下自己聊天记录
 	// 检擦是不是好友关系
 	if !UserFriendService.IsFriend(message.UserId, message.TargetId, 1) { // TODO 默认为私聊 暂时不做群聊处理
@@ -86,12 +88,46 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 	id := fmt.Sprintf("%s->%s", models.GetUserKey(message.UserId), models.GetUserKey(message.TargetId)) // 1 -> 2 发消息
 	b, _ := json.Marshal(message)                                                                       // 将struct 转化为string 存储到mongodb
 	err := mongoUtils.Insert(c, config.Instance().Mongo.Database, id, string(b), int64(3*consts.Month)) // 插入到mongodb 默认三个月过期
+	if err != nil {
+		log.Error().Msgf("消息存储mongodb错误 %s", id)
+	}
 }
 
-func (m *messageService) Ping(c *gin.Context, client *models.Client, req *models.WRequest) {
-	fmt.Println("ping: ", req.Event)
-	UserBasicService.UpdateHeartTime(client.User.ID) // 更新一下心跳时间
-	models.SendSuccess(client, req.Event)
+// MessageList @Title 返回消息列表
+func (m *messageService) MessageList(c *gin.Context, client *models.Client, req *models.WRequest) {
+	fmt.Println("messageList", req)
+	var searchMessageInput *request.ListMessageInput
+	if err := mapstructure.Decode(req.Data, &searchMessageInput); err != nil {
+		log.Error().Str("user_id", req.Data["userId"].(string)).Msg("发送消息失败")
+		return
+	}
+
+	// 获取两个消息
+	userMessageList, err := mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, fmt.Sprintf("%s->%s", models.GetUserKey(searchMessageInput.UserId), models.GetUserKey(searchMessageInput.TargetId)))
+	if err != nil {
+		return
+	}
+	targetUserMessageList, err := mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, fmt.Sprintf("%s->%s", models.GetUserKey(searchMessageInput.TargetId), models.GetUserKey(searchMessageInput.UserId)))
+	if err != nil {
+		return
+	}
+	mergeArr := append(userMessageList, targetUserMessageList...) // 合并数组
+	messageList := make([]*request.SendMessageInputReq, len(mergeArr))
+	for i, message := range mergeArr { // 把字符串消息转换一下
+		var revMsg *request.SendMessageInputReq
+		_ = json.Unmarshal([]byte(message.Content), &revMsg)
+		messageList[i] = revMsg
+	}
+	sort.SliceStable(messageList, func(i, j int) bool {
+		return messageList[i].CreateTime.Unix() < messageList[j].CreateTime.Unix()
+	})
+	client.SendMsg(&models.WResponse{ // 发送消息给客户端
+		Event:     "messageList",
+		Data:      messageList,
+		Code:      200,
+		ErrorMsg:  "",
+		Timestamp: time.Now().Unix(),
+	})
 }
 
 // settingRecentChat @Title 设置最近聊天列表
@@ -142,4 +178,10 @@ func (m *messageService) setRecentChat(c *gin.Context, id int64, userRecentModel
 	}
 	err = redisUtil.HSet(c, consts.RecentChat, models.GetUserKey(id), userRecentList...) // 重置一下最近的聊天列表
 	return
+}
+
+func (m *messageService) Ping(c *gin.Context, client *models.Client, req *models.WRequest) {
+	fmt.Println("ping: ", req.Event)
+	UserBasicService.UpdateHeartTime(client.User.ID) // 更新一下心跳时间
+	models.SendSuccess(client, req.Event)
 }

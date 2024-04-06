@@ -6,7 +6,7 @@
       </p>
       <ul>
         <li>
-          <a-avatar :src="userInfo.avatar" size="large" @click="switComponents(UserInfo)" />
+          <a-avatar :src="userInfo?.avatar" size="large" @click="switComponents(UserInfo)" />
         </li>
         <li>
           <a-avatar size="large" class="li" @click="switComponents(Message)">
@@ -63,7 +63,6 @@ const userInfo = ref<any>({
 const clickChat = ref<any>({name: 'hello'})
 onMounted(() => {
   userInfo.value = Session.get('userInfo')
-  console.log('userInfo',userInfo.value)
   if (userInfo.value == null){
     return 
   }

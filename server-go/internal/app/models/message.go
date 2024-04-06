@@ -19,7 +19,8 @@ type Message struct {
 
 // Trainer @Title 插入到mongodb 模型
 type Trainer struct {
-	Content   string
-	StartTime int64
-	EndTime   int64
+	ID        string `json:"id"`
+	Content   string `json:"content"`
+	StartTime int64  `json:"startTime"`
+	EndTime   int64  `json:"endTime"`
 }

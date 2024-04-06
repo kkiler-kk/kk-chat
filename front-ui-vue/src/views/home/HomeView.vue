@@ -4,7 +4,7 @@
       <a-layout-sider :style="siderStyle" width="450px"><Sider @getValue="getClickChat"/></a-layout-sider>
       <a-layout>
         <a-layout-header :style="headerStyle"><Header :clickChat="clickChat"/></a-layout-header> <!-- 相继传入 从 sider点击聊天对象 传入组件 -->
-        <a-layout-content :style="contentStyle"><Content :clickChat="clickChat"/></a-layout-content>
+        <a-layout-content :style="contentStyle"><Content :clickChat="clickChat" /></a-layout-content>
         <a-layout-footer :style="footerStyle"><Footer  :clickChat="clickChat" /></a-layout-footer>
       </a-layout>
     </a-layout>

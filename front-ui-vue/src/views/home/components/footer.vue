@@ -74,8 +74,8 @@ const handleSendMsg = () => { // 发送消息
   }
   formState.value.userId = userInfo.id
   formState.value.targetId = props.clickChat.id
-  console.log('props.clickChat handleSendMsg', formState.value)
   sendMsg("sendMessage", formState.value)
+  formState.value.content = ''
 }
 // getSocket().onmessage = function (event) {
 //   console.log("getSocket", event)

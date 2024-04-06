@@ -124,7 +124,6 @@ func handlerMsg(c *gin.Context, client *models.Client, message []byte) {
 		log.Error().Msg("handlerMsg request.Event is null")
 		return
 	}
-	fmt.Println(fmt.Sprintf("%+v", request))
 	fun, ok := service.RoutersFun[request.Event]
 	if !ok {
 		log.Error().Msg(fmt.Sprintf("handlerMsg function id %v: not registered", request.Event))

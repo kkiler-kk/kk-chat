@@ -60,40 +60,12 @@ export function createSocket() {
     }
 
 };
-export function onMessage() {
+export async function onMessage(event) {
     if (socket == undefined || !isActive) {
         console.log("socket连接异常，发送失败!")
         return
     }
     try {
-        return socket.onmessage
-        // function (event) {
-        //     isActive = true;
-        //     console.log('WebSocket:收到一条消息', event.data);
-
-        //     let isHeart = false;
-        //     if (!isJsonString(event.data)) {
-        //         console.log('socket message incorrect format:' + JSON.stringify(event));
-        //         return;
-        //     }
-        //     const message = JSON.parse(event.data);
-        //     return message
-        // }
-    } catch (err) {
-        return null
-    }
-    return null
-}
-export function init() {
-    socket.onopen = function (_) {
-        console.log('WebSocket:已连接');
-        isActive = true;
-        //心跳检测重置
-        heartCheck.reset().start();
-        lockReconnect = true
-    };
-
-    socket.onmessage = function (event) {
         isActive = true;
         console.log('WebSocket:收到一条消息', event.data);
 
@@ -118,10 +90,58 @@ export function init() {
         if (message.event === 'notice') {
 
         }
+        heartCheck.reset().start()
 
-        if (onMessage && !isHeart) {
-            onMessage.call(null, event)
+        window.dispatchEvent(new CustomEvent("onmessageWS", {
+            detail: {
+                event: message
+            }
+        }))
+    } catch (err) {
+        return null
+    }
+    return null
+}
+export function init() {
+    socket.onopen = function (_) {
+        console.log('WebSocket:已连接');
+        isActive = true;
+        //心跳检测重置
+        heartCheck.reset().start();
+        lockReconnect = true
+    };
+
+    socket.onmessage = function (event) {
+        isActive = true;
+        // console.log('WebSocket:收到一条消息', event.data);
+
+        let isHeart = false;
+        if (!isJsonString(event.data)) {
+            console.log('socket message incorrect format:' + JSON.stringify(event));
+            return;
         }
+
+        const message = JSON.parse(event.data);
+        if (message.event === 'ping') {
+            isHeart = true;
+        }
+
+        // 强制退出
+        if (message.event === 'kick') {
+            Session.clear()
+            location.reload();
+        }
+
+        // 通知
+        if (message.event === 'notice') {
+
+        }
+
+        window.dispatchEvent(new CustomEvent("onmessageWS", {
+            detail: {
+                event: message
+            }
+        }))
         heartCheck.reset().start()
     }
 

@@ -2,16 +2,26 @@
   <div>
     <div class="container">
       <ul class="list-unstyled py-4" id="scrollIV">
-        <li v-for="(message, index) in messageList" class="d-flex message">
-          <div class="content">
+        <li
+          v-for="(message, index) in messageList"
+          class="d-flex message"
+         
+        >
+          <div class="content"  :class="{ self: userInfo.id == message?.user?.id }">
             <div class="mr-lg-3 me-2">
-              <a-avatar shape="square" class="avatar" :src="logo" size="large" />
+              <a-avatar
+                shape="square"
+                class="avatar"
+                :src="message?.user?.avatar"
+                size="large"
+              />
             </div>
             <div class="message-body">
-              <div class="name">KK 7:19PM</div>
+              <div class="name">
+                {{ message?.user?.name }} {{ formatPast(new Date(message?.createTime)) }}
+              </div>
               <div class="message-row">
-                Hello WroldHello WroldHello WroldHello WroldHello WroldHello WroldHello
-               
+                {{ message.content }}
               </div>
             </div>
           </div>
@@ -21,23 +31,47 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted, watch } from "vue";
+import { sendMsg, getSocket } from "@/utils/websocket";
 import logo from "@/assets/images/chat.png";
-import { UserInfo } from "@/store/userInfo";
+import { isJsonString } from "@/utils/is";
+import { formatPast } from "@/utils/formatTime";
+import { Session } from "@/utils/storage";
+import { message } from "ant-design-vue";
+import { debug } from "console";
 interface Props {
-  clickChat?: UserInfo;
+  clickChat?: any;
 }
-interface Message {
-  // 消息结构体
-  id: string;
-  content: string; // 发送内容
-  sendId: number; // 发送人id
-  sendUser: UserInfo; // 发送人信息
-  type: number; // 消息类型 群聊 or 私聊
-  createdAt: string; // 消息创建时间
+
+const props = defineProps<Props>();
+const messageList = ref<any>([]);
+const userInfo = ref<any>();
+onMounted(() => {
+  userInfo.value = Session.get("userInfo");
+  if (userInfo == undefined) {
+    message.error("请先登录!");
+    return;
+  }
+  window.addEventListener("onmessageWS", getSocketData);
+});
+// 监听 点击对象值的变换 请求获取历史消息
+watch(
+  () => props.clickChat,
+  (newVal, oldVal) => {
+    let data = {
+      targetId: newVal.id,
+      userId: userInfo.value.id,
+    };
+    sendMsg("messageList", data); // 发送给客户端消息 recentChatList 获取最近聊天信息列表 （用户列表）
+  }
+);
+function getSocketData(data) {
+  const message = data.detail.event;
+  if (message.event == "messageList") {
+    messageList.value = message.data;
+    console.log("messageList", messageList.value);
+  }
 }
-defineProps<Props>();
-const messageList = ref<Message[]>([{}, {}]);
 </script>
 <style scoped>
 .container {
@@ -48,43 +82,31 @@ const messageList = ref<Message[]>([{}, {}]);
 }
 .content {
   display: flex;
-  width: 80%;
+  width: 100%;
   overflow: auto;
+  margin-bottom: 10px;
   /* flex-wrap: wrap; */
 }
 .message {
-  /* float: right; */
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
 }
 .message-body {
   height: auto;
 }
 .name {
-  float: left;
-  display: block;
+  /* float: left; */
+  /* display: block; */
   width: 100%;
 }
 
 .list-unstyled {
-  padding-left: 10px;
-  margin-top: 1.5rem !important;
+  margin-top: 1rem !important;
   list-style: none;
 }
 .message-row {
-  /* display: -ms-grid;
-  display: grid;
-  -ms-grid-columns: 1fr auto;
-  grid-template-columns: 1fr auto;
-  margin: 16px;
-  height: 64px;
-  border-radius: 16px;
-  overflow: auto;
-  background-color: black;
-  color: black; */
-  /* border: solid #f9465c 1px; */
-  /* margin: 16px; */
-  display: grid;
-  margin-bottom: 16px;
-  margin-top: 26px;
+  /* margin-bottom: 16px; */
   border-radius: 12px;
   padding-left: 16px;
   overflow: auto;
@@ -96,5 +118,8 @@ const messageList = ref<Message[]>([{}, {}]);
 .avatar {
   width: 40px;
   height: 40px;
+}
+.self {
+  align-self: flex-end;
 }
 </style>
