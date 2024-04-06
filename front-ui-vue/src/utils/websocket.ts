@@ -58,7 +58,7 @@ export function createSocket() {
         console.log('createSocket err:' + e);
         reconnect(); // 重连一下websocket
     }
-   
+
 };
 export function onMessage() {
     if (socket == undefined || !isActive) {
@@ -66,20 +66,21 @@ export function onMessage() {
         return
     }
     try {
-        socket.onmessage = function (event) {
-            isActive = true;
-            console.log('WebSocket:收到一条消息', event.data);
+        return socket.onmessage
+        // function (event) {
+        //     isActive = true;
+        //     console.log('WebSocket:收到一条消息', event.data);
 
-            let isHeart = false;
-            if (!isJsonString(event.data)) {
-                console.log('socket message incorrect format:' + JSON.stringify(event));
-                return;
-            }
-            const message = JSON.parse(event.data);
-            return message
-        }
+        //     let isHeart = false;
+        //     if (!isJsonString(event.data)) {
+        //         console.log('socket message incorrect format:' + JSON.stringify(event));
+        //         return;
+        //     }
+        //     const message = JSON.parse(event.data);
+        //     return message
+        // }
     } catch (err) {
-
+        return null
     }
     return null
 }
@@ -88,7 +89,7 @@ export function init() {
         console.log('WebSocket:已连接');
         isActive = true;
         //心跳检测重置
-        heartCheck.start();
+        heartCheck.reset().start();
         lockReconnect = true
     };
 
@@ -117,6 +118,11 @@ export function init() {
         if (message.event === 'notice') {
 
         }
+
+        if (onMessage && !isHeart) {
+            onMessage.call(null, event)
+        }
+        heartCheck.reset().start()
     }
 
     socket.onerror = function (_) {
@@ -127,6 +133,7 @@ export function init() {
 
     socket.onclose = function (_) {
         console.log('WebSocket:已关闭');
+        heartCheck.reset()
         reconnect();
         isActive = false;
     };
@@ -145,21 +152,62 @@ const reconnect = () => {
         lockReconnect = false
     }, 5000);
 }
+
+export function addOnMessage(onMessageList: any, func: Function) {
+    let exist = false;
+    for (let i = 0; i < onMessageList.length; i++) {
+        if (onMessageList[i].name == func.name) {
+            onMessageList[i] = func;
+            exist = true;
+        }
+    }
+    if (!exist) {
+        onMessageList.push(func);
+    }
+}
+// const heartCheck = {
+//     timeout: 3000,
+//     timeoutObj: null,
+//     serverTimeoutObj: null,
+//     start: function() {
+//         var self = this;
+//         this.timeoutObj && clearTimeout(this.timeoutObj)
+//         this.serverTimeoutObj && clearTimeout(this.serverTimeoutObj)
+//         this.timeoutObj = setTimeout(function(){
+//             //这里发送一个心跳，后端收到后，返回一个心跳消息，
+//             sendMsg("ping",null)
+//             // self.serverTimeoutObj = setTimeout(function() {
+//             //   socket.close();
+//               // createWebSocket();
+//             // }, self.timeout);
+//         }, this.timeout)
+//     },
+// }
+
 const heartCheck = {
-    timeout: 3000,
-    timeoutObj: null,
-    serverTimeoutObj: null,
-    start: function() {
-        var self = this;
-        this.timeoutObj && clearTimeout(this.timeoutObj)
-        this.serverTimeoutObj && clearTimeout(this.serverTimeoutObj)
-        this.timeoutObj = setTimeout(function(){
-            //这里发送一个心跳，后端收到后，返回一个心跳消息，
-            sendMsg("ping",null)
-            // self.serverTimeoutObj = setTimeout(function() {
-            //   socket.close();
-              // createWebSocket();
+    timeout: 5000,
+    timeoutObj: setTimeout(() => { }),
+    serverTimeoutObj: setInterval(() => { }),
+    reset: function () {
+        clearTimeout(this.timeoutObj);
+        clearTimeout(this.serverTimeoutObj);
+        return this;
+    },
+    start: function () {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
+        const self = this;
+        clearTimeout(this.timeoutObj);
+        clearTimeout(this.serverTimeoutObj);
+        this.timeoutObj = setTimeout(function () {
+            socket.send(
+                JSON.stringify({
+                    event: 'ping',
+                })
+            );
+            // self.serverTimeoutObj = setTimeout(function () {
+            //     console.log('关闭服务');
+            //     socket.close();
             // }, self.timeout);
-        }, this.timeout)
+        }, this.timeout);
     },
 }

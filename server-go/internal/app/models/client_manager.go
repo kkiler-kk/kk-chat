@@ -194,6 +194,7 @@ func (manager *ClientManager) EventRegister(client *Client) {
 		Client: client,
 	})
 	fmt.Println("有新用户登录....", client.User.Identity)
+
 	////发送当前客户端标识
 	//SendSuccess(client, "connected", WResponse{Data: {"id": client.ID, "userInfo": client.User}})
 }

@@ -47,6 +47,7 @@ func (u *messageControl) Handler(c *gin.Context) {
 	client.ID = models.GetUserKey(user.ID) // 设置id
 	client.User = user
 	models.GetClientManager().Register <- client
+	service.UserBasicService.UpdateLoginTime(client.User.ID) // 更新 用户登录了数据库
 	go u.read(c, client)
 	go u.write(c, client)
 }
@@ -91,7 +92,8 @@ func (u *messageControl) write(c *gin.Context, client *models.Client) {
 	for {
 		select {
 		case <-client.CloseSignal:
-			log.Info().Msg(fmt.Sprintf("websocket client quit, user:%+v", client.User))
+			service.UserBasicService.UpdateLogout(client.User.ID) // 用户断开websocket链接 退出 更新一下数据库
+			log.Info().Msg(fmt.Sprintf("websocket client quit, user:%+v", client.User.Identity))
 			return
 		case message, ok := <-client.Send:
 			if !ok {

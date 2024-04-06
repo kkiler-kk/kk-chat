@@ -16,3 +16,10 @@ type Message struct {
 	Desc     string
 	Amount   int
 }
+
+// Trainer @Title 插入到mongodb 模型
+type Trainer struct {
+	Content   string
+	StartTime int64
+	EndTime   int64
+}

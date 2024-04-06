@@ -90,6 +90,8 @@ type Redis struct {
 type Mongo struct {
 	Host        string  `toml:"host"`
 	Port        uint    `toml:"port"`
+	Name        string  `toml:"name"`
+	Database    string  `toml:"database"`
 	Pass        string  `toml:"pass"`
 	MaxPoolSize *uint64 `toml:"maxPoolSize"`
 	MinPoolSize *uint64 `toml:"minPoolSize"`

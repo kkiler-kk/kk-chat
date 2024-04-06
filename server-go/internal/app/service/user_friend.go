@@ -59,3 +59,13 @@ func (u *userFriendService) List(c *gin.Context) (userList []*response.UserFrien
 	}
 	return
 }
+
+// IsFriend @Title 检查一下是否属于好友关系 是 返回true 否则false Type 为类型 1 是私聊 2 群聊
+func (u *userFriendService) IsFriend(userId, targetId int64, Type int) bool {
+	userFriend := &models.UserFriends{
+		UserId:   userId,
+		FriendId: targetId,
+	}
+	result, _ := dao.UserFriends.FindUserFriends(userFriend)
+	return len(result) != 0 // 说明是好友关系 我只是不想多谢一成dao接口
+}

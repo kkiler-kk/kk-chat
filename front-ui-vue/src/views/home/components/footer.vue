@@ -30,8 +30,15 @@ import { Session } from "@/utils/storage";
 interface DataItem {
   content: string; // 发送内容
   userId: number; // 发送者id
+  user: UserInfo,
+  targetUser: UserInfo,
   targetId: number; //发送目标
   type: 1; // 类型 私聊或者群聊
+}
+interface UserInfo {
+  id: number,
+  name: string,
+  avatar: string,
 }
 interface Props {
   clickChat?: any
@@ -54,6 +61,16 @@ const handleSendMsg = () => { // 发送消息
   if (userInfo == undefined) {
     message.error("请先登录!")
     return
+  }
+  formState.value.user = {
+    id: userInfo.id,
+    name: userInfo.name,
+    avatar: userInfo.avatar,
+  }
+  formState.value.targetUser = {
+    id: props.clickChat.id,
+    name: props.clickChat.name,
+    avatar: props.clickChat.avatar,
   }
   formState.value.userId = userInfo.id
   formState.value.targetId = props.clickChat.id

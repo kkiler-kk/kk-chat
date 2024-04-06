@@ -54,15 +54,7 @@ import {formatPast} from '@/utils/formatTime'
 import plusFirendGroup from "@/views/home/components/viewsSoder/components/plusFirendGroup.vue";
 import {UserInfo} from '@/store/userInfo'
 
-// interface Props{
-//   clickChat: UserInfo;  // 被点击的聊天对象 
-// }
-// const props = withDefaults(defineProps<Props>(), {
-//   clickChat: () => {
-//     return null;
-//   },
-// });
-const clickChat = ref<UserInfo>()
+const clickChat = ref<any>()
 const visible = ref<boolean>(false);
 const value = ref<string>("");
 const openPlusRef = ref();

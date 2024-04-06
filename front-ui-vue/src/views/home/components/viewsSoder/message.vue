@@ -21,21 +21,25 @@
       />
     </div>
     <div class="content">
-      <a-card v-for="(item, index) in data" class="card" @click="handleSelectChat(item)">
+      <a-card
+        v-for="(item, index) in dataList"
+        class="card"
+        @click="handleSelectChat(item)"
+      >
         <div class="media">
           <div class="media-avatar">
-            <a-badge dot color="green">
-              <a-avatar shape="square" class="avatar" size="large">
-                <template #icon><UserOutlined /></template>
-              </a-avatar>
+            <a-badge dot :color="item.isLogout ? 'green' : 'rgb(204, 204, 204)'">
+              <a-avatar shape="square" class="avatar" size="large" :src="item.avatar"/>
             </a-badge>
           </div>
-          <div style="margin-top: 10px;">
-            <div  clas="d-flex align-items-center mb-1">
-              <h6 class="text-truncate mb-0 me-auto">KK</h6>
-              <p class="small text-muted text-nowrap ms-4 mb-0">11:08 am</p>
+          <div style="margin-top: 10px">
+            <div clas="d-flex align-items-center mb-1">
+              <h6 class="text-truncate mb-0 me-auto" style="float: left;">{{ item.name }}</h6>
+              <p class="small text-muted text-nowrap ms-4 mb-0" style="float: right;"> {{formatDate(new Date(item.createdAt), "YYYY-mm-dd HH:MM")}}</p>
             </div>
-            <div class="text-truncate">It is a long established fact that a reader w...</div>
+            <div class="text-truncate" style="float: left;">
+              {{ item.content }}
+            </div>
           </div>
         </div>
       </a-card>
@@ -44,21 +48,22 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import { UserOutlined } from "@ant-design/icons-vue";
-import { sendMsg } from "@/utils/websocket";
+import { sendMsg, getSocket } from "@/utils/websocket";
 import plusFirendGroup from "@/views/home/components/viewsSoder/components/plusFirendGroup.vue";
-import {UserInfo} from '@/store/userInfo'
+import { message } from "ant-design-vue";
+import { formatDate } from "@/utils/formatTime";
+import { isJsonString } from "@/utils/is";
 const visible = ref<boolean>(false);
 const value = ref<string>("");
 const openPlusRef = ref();
-const data: UserInfo[] = [
-  
-];
-const clickChat = ref<UserInfo>()
+const dataList = ref<any>([]);
+const clickChat = ref<any>();
 onMounted(() => {
   sendMsg("recentChatList", null); // 发送给客户端消息 recentChatList 获取最近聊天信息列表 （用户列表）
 });
+const emit = defineEmits(["getValue"])
 const onSearch = (searchValue: string) => {
   console.log("use value", searchValue);
   console.log("or use this.value", value.value);
@@ -66,10 +71,25 @@ const onSearch = (searchValue: string) => {
 const handleOpenPlus = () => {
   openPlusRef.value.showModal();
 };
+getSocket().onmessage = ({ data }) => {
+  if (!isJsonString(data)) {
+    console.log("socket message incorrect format:" + JSON.stringify(data));
+    return;
+  }
 
-const handleSelectChat = (item: UserInfo) => {
-    clickChat.value = item
+  const message = JSON.parse(data);
+  if (message.event === "recentChatList") {
+    dataList.value = message.data
+  }
+  console.log("dataList", dataList.value)
+};
+
+// handlSelectChat 选择聊天对象
+const handleSelectChat = (item :any) => {  // 从子组件传值到父组件值
+  clickChat.value = item
+  emit("getValue", item)
 }
+
 </script>
 <style scoped>
 .div1 {
@@ -113,18 +133,17 @@ const handleSelectChat = (item: UserInfo) => {
 }
 .card:hover {
   border: 1px solid rgb(24, 144, 255);
-  box-shadow: 0.5px 0.5px rgb(24,144,255);
+  box-shadow: 0.5px 0.5px rgb(24, 144, 255);
 }
-:deep(.card > .ant-card-body){
+:deep(.card > .ant-card-body) {
   padding: 0px;
 }
 .avatar {
   width: 40px;
   height: 40px;
 }
-.media-avatar{
+.media-avatar {
   margin-right: 1rem !important;
   margin-top: 1rem !important;
 }
-
 </style>

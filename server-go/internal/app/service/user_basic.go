@@ -152,3 +152,21 @@ func (u *userBasicService) Logout(c *gin.Context) (err error) {
 	err = dao.UserBasic.Update(user)
 	return
 }
+
+// UpdateHeartTime @Title 更新心跳
+func (u *userBasicService) UpdateHeartTime(id int64) {
+	var user = &models.UserBasic{ID: id, HeartbeatTime: time.Now()}
+	_ = dao.UserBasic.Update(user)
+}
+
+// UpdateLogout @Title 用户断开websocket 更新退出时间
+func (u *userBasicService) UpdateLogout(id int64) {
+	var user = &models.UserBasic{ID: id, LoginOutTime: time.Now(), IsLogout: 1}
+	_ = dao.UserBasic.Update(user)
+}
+
+// UpdateLoginTime @Title 用户断开websocket 更新用户在线
+func (u *userBasicService) UpdateLoginTime(id int64) {
+	var user = &models.UserBasic{ID: id, LoginTime: time.Now(), IsLogout: 2}
+	_ = dao.UserBasic.Update(user)
+}

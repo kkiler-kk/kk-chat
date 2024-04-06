@@ -55,7 +55,6 @@ const footerStyle: CSSProperties = {
   backgroundColor: "rgb(243, 242, 239)",
 };
 onMounted(() => {
-  console.log("HemeView");
   console.log('Session.get("token")', Session.get("token"));
   if (Session.get("token") == undefined) {
     // 检查是否登录
@@ -73,7 +72,6 @@ onMounted(() => {
 const clickChat = ref<any>()
 // 获取点击要聊天的对象
 const getClickChat = (value: any) =>  {
-  console.log('HomeView', value)
   clickChat.value = value
 }
 </script>

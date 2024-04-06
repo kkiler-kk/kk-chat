@@ -34,7 +34,7 @@ func Init() {
 	redis.InitRedis()
 
 	// 初始化mongo
-	mongo.InitRedis()
+	mongo.InitMongoDB()
 	// 初始化路由
 	router.InitRouter()
 }
