@@ -69,7 +69,11 @@ function getSocketData(data) {
   const message = data.detail.event;
   if (message.event == "messageList") {
     messageList.value = message.data;
-    console.log("messageList", messageList.value);
+  }else if(message.event == "sendMessage") {
+    if (props.clickChat.id == message.data.targetId || message.data.userId == props.clickChat.id) { // 如果刚好和他聊天 就添加进当前消息聊天记录
+      messageList.value.push(message.data)
+    }
+      console.log("message.data", message.data)
   }
 }
 </script>

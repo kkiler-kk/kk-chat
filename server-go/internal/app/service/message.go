@@ -79,11 +79,13 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 	}
 	wResponse.Event = "sendMessage"
 	wResponse.Code = 200
+	wResponse.Data = message
 	targetClient, ok := models.GetClientManager().IdInClient(models.GetUserKey(message.TargetId))
 
 	if ok { // 说明客户端在线
 		targetClient.SendMsg(wResponse) // 直接发送消息给客户端
 	}
+	client.SendMsg(wResponse)                                                                           // 给客户端发送
 	_ = m.settingRecentChat(c, message)                                                                 //设置最近聊天列表
 	id := fmt.Sprintf("%s->%s", models.GetUserKey(message.UserId), models.GetUserKey(message.TargetId)) // 1 -> 2 发消息
 	b, _ := json.Marshal(message)                                                                       // 将struct 转化为string 存储到mongodb
@@ -91,6 +93,8 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 	if err != nil {
 		log.Error().Msgf("消息存储mongodb错误 %s", id)
 	}
+
+	_ = redisUtil.Incr(c, redisCountKey) // 聊天总数 + 1
 }
 
 // MessageList @Title 返回消息列表

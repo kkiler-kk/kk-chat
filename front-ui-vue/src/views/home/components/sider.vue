@@ -9,7 +9,7 @@
           <a-avatar :src="userInfo?.avatar" size="large" @click="switComponents(UserInfo)" />
         </li>
         <li>
-          <a-avatar size="large" class="li" @click="switComponents(Message)">
+          <a-avatar size="large" class="li click" @click="switComponents(Message)">
             <template #icon><MessageFilled /></template>
           </a-avatar>
         </li>
@@ -100,6 +100,10 @@ ul li {
   width: 90px;
 }
 .li:hover {
+  color: rgb(24, 144, 255);
+  background-color: "rgb(24, 144, 255)";
+}
+.click {
   color: rgb(24, 144, 255);
   background-color: "rgb(24, 144, 255)";
 }
