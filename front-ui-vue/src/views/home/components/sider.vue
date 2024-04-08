@@ -6,26 +6,26 @@
       </p>
       <ul>
         <li>
-          <a-avatar :src="userInfo?.avatar" size="large" @click="switComponents(UserInfo)" />
+          <a-avatar :src="userInfo?.avatar" size="large" @click="switComponents(UserInfo, 0)" />
         </li>
         <li>
-          <a-avatar size="large" class="li click" @click="switComponents(Message)">
+          <a-avatar size="large" class="li" :class="{click: index == 1}" @click="switComponents(Message, 1)">
             <template #icon><MessageFilled /></template>
           </a-avatar>
         </li>
         <li>
-          <a-avatar size="large" class="li" @click="switComponents(Contact)">
+          <a-avatar size="large" class="li" :class="{click: index == 2}" @click="switComponents(Contact, 2)">
             <template #icon><ContactsFilled /></template>
           </a-avatar>
         </li>
 
         <li>
-          <a-avatar size="large" class="li" @click="switComponents(Like)">
+          <a-avatar size="large" class="li" :class="{click: index == 3}" @click="switComponents(Like,3)">
             <template #icon><fire-filled /></template>
           </a-avatar>
         </li>
         <li>
-          <a-avatar size="large" class="li" @click="switComponents(Setting)">
+          <a-avatar size="large" class="li" :class="{click: index == 4}" @click="switComponents(Setting, 4)">
             <template #icon><SettingFilled /></template>
           </a-avatar>
         </li>
@@ -61,6 +61,7 @@ const userInfo = ref<any>({
   avatar: 'http://127.0.0.1:9345/resource/public/file/20240403/douwei.jpg'
 })
 const clickChat = ref<any>({name: 'hello'})
+const index = ref<number>()
 onMounted(() => {
   userInfo.value = Session.get('userInfo')
   if (userInfo.value == null){
@@ -68,8 +69,9 @@ onMounted(() => {
   }
   clickChat.value = new Object
 })
-function switComponents(componet) {
+function switComponents(componet ,i) {
   whichComponent.value = componet;
+  index.value = i
 }
 const getValue = (value: any) => {  // 从子组件传出 当前点击的值
   clickChat.value = value

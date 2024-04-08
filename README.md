@@ -20,3 +20,10 @@
 - 核心代码 ./internal/*
 
 #### 功能列表
+ 
+
+#### 效果图
+![](server-go/resource/public/file/default/constact.png "")
+![](server-go/resource/public/file/default/find friend.png "")
+![](server-go/resource/public/file/default/member.png "")
+![](server-go/resource/public/file/default/userInfo.png "")

@@ -8,6 +8,13 @@ export function createUserBasic(data){
         data: data,
     })
 }
+export function updateUserBasic(data){
+    return request({
+        url: '/api/app/user/update',
+        method: 'post',
+        data: data,
+    })
+}
 export function login(data){
     return request({
         url: '/api/app/user/login',

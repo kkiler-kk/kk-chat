@@ -19,10 +19,12 @@
     "@ant-design/icons-vue": "^6.0.1",
     "ant-design-vue": "^3.2.11",
     "axios": "^1.6.8",
+    "emoji-mart-vue": "^2.6.6",
     "js-pinyin": "^0.2.5",
     "pinia": "^2.1.7",
     "qs": "^6.12.0",
     "unplugin-vue-components": "^0.26.0",
+    "v-emoji-picker": "^2.3.3",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0",
     "vuex": "^4.1.0"

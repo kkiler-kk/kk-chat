@@ -19,6 +19,8 @@
         <template #icon><arrow-right-outlined /></template>
       </a-button>
     </div>
+
+    <VEmojiPicker @select="selectEmoji" />
   </div>
 </template>
 <script lang="ts" setup>
@@ -53,6 +55,9 @@ const formState = ref<DataItem>({
 });
 
 const handleSendMsg = () => { // 发送消息
+  if (formState.value.content == '') {
+    return 
+  }
   if (props.clickChat == undefined) {
     message.error('请选择聊天对象!')
     return 
@@ -77,8 +82,6 @@ const handleSendMsg = () => { // 发送消息
   sendMsg("sendMessage", formState.value)
   formState.value.content = ''
 }
-// getSocket().onmessage = function (event) {
-//   console.log("getSocket", event)
-// }
+
 </script>
 <style scoped></style>

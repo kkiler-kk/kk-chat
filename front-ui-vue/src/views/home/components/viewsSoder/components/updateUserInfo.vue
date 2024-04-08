@@ -4,6 +4,7 @@
       <a-form
         :model="formState"
         name="basic"
+        ref="formRef"
         autocomplete="off"
         @finish="handleOk"
         @finishFailed="onFinishFailed"
@@ -69,7 +70,6 @@
         <a-form-item
           label="验证码"
           name="verificationCode"
-          :rules="[{ required: true, message: '请输入验证码!' }]"
         >
           <a-input
             v-model:value="formState.verificationCode"
@@ -82,7 +82,6 @@
           label="手机号"
           name="phone"
           :rules="[
-            { required: true, message: '请输入手机号' },
             {
               pattern: /^1(3\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/,
               message: '请输入正确手机号',
@@ -103,7 +102,7 @@
 import { reactive, ref, onMounted } from "vue";
 import { message } from "ant-design-vue";
 import { sendEmailCode } from "@/api/auth/auth.ts";
-import { createUserBasic } from "@/api/userBasic/userBasic.ts";
+import { updateUserBasic } from "@/api/userBasic/userBasic.ts";
 import type { UploadChangeParam, UploadProps } from "ant-design-vue";
 import { uploadImages } from "@/api/file/file";
 import { Session } from "@/utils/storage";
@@ -128,6 +127,7 @@ const formState = reactive<FormState>({
   phone: "",
   verificationCode: "",
 });
+const formRef = ref(null)
 const fileList = ref([]);
 const url = ref(import.meta.env.VITE_API_URL + "api/app/file/upload/image");
 const loading = ref<boolean>(false);
@@ -150,24 +150,23 @@ onMounted(() => {
     .catch((err) => {
     });
 });
-const onFinish = (values: any) => {
-  console.log("Success:", values);
-  let userInfo = Session.get("userInfo");
-  formState.id = userInfo.id;
-  createUserBasic(formState)
-    .then((res) => {
-      message.success("注册成功！");
-    })
-    .catch((err) => {
-      console.log("error", err);
-      message.error("添加失败", err);
-    });
-};
+
 
 const onFinishFailed = (errorInfo: any) => {};
 
 const handleOk = (e: MouseEvent) => {
-  console.log(e);
+  formRef.value.validateFields()
+  let userInfo = Session.get("userInfo");
+  formState.id = userInfo.id;
+  updateUserBasic(formState)
+    .then((res) => {
+      message.success("修改成功！");
+      open.value = false
+    })
+    .catch((err) => {
+      console.log("error", err);
+      message.error("修改失败", err);
+    });
   open.value = false;
 };
 const beforeUpload = (file: UploadProps["fileList"][number]) => {

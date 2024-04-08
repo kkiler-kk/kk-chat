@@ -21,9 +21,9 @@
       />
     </div>
     <div class="content">
-      <div v-for="(item, index) in data" :key="index">
+      <div v-for="(item, o) in data" :key="index">
         <div style="float: left; "> <h6>{{ item.type }}</h6></div>
-        <div v-for="(l, i) in item.list" :key="l.id" class="card" @click="handleSelectChat(l)">
+        <div v-for="(l, i) in item.list" :key="l.id" class="card"  :class="{click: index == l.id}" @click="handleSelectChat(l,l.id)">
           <div class="media">
             <div class="media-avatar">
               <a-badge dot :color="l.isLogout ? 'green' : 'rgb(204, 204, 204)'">
@@ -36,7 +36,7 @@
                 <!-- <p class="small text-muted text-nowrap ms-4 mb-0">11:08 am</p> -->
               </div>
               <div class="text-truncate">
-                {{ l.isLogout ? '现在' : formatPast(l.loginOutTime) }}在线
+                {{ l.isLogout ? '' : formatPast(l.loginOutTime) }} 在线
               </div>
             </div>
           </div>
@@ -52,13 +52,12 @@ import { listFriend } from "@/api/userFriend/userFriend";
 import pinyin from "js-pinyin";
 import {formatPast} from '@/utils/formatTime'
 import plusFirendGroup from "@/views/home/components/viewsSoder/components/plusFirendGroup.vue";
-import {UserInfo} from '@/store/userInfo'
 
 const clickChat = ref<any>()
 const visible = ref<boolean>(false);
 const value = ref<string>("");
 const openPlusRef = ref();
-
+const index = ref<number>()
 const data = ref<any>();
 
 const emit = defineEmits(["getValue"])
@@ -90,8 +89,9 @@ const handleOpenPlus = () => {
 };
 
 // handlSelectChat 选择聊天对象
-const handleSelectChat = (item :UserInfo) => {  // 从子组件传值到父组件值
+const handleSelectChat = (item :any, i: number) => {  // 从子组件传值到父组件值
   clickChat.value = item
+  index.value = i
   emit("getValue", item)
 }
 
@@ -159,6 +159,10 @@ const filterName = (list) => {
   border: 1px solid rgb(24, 144, 255);
   box-shadow: 0.5px 0.5px rgb(24, 144, 255);
   color: rgb(24, 144, 255);
+}
+.click {
+  border: 1px solid rgb(24, 144, 255);
+  box-shadow: 0.5px 0.5px rgb(24, 144, 255);
 }
 :deep(.ant-card-body) {
   padding: 0px;

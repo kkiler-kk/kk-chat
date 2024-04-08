@@ -5,7 +5,7 @@
       <a-popover v-model:open="visible" class="botton" trigger="click">
         <template #content>
           <p @click="handleOpenPlus" style="cursor: pointer">加好友/加群</p>
-          <p style="cursor: pointer">创建群聊</p>
+          <p style="cursor: pointer" @click="handleCreateGroup">创建群聊</p>
         </template>
         <a-button type="primary">找朋友</a-button>
       </a-popover>
@@ -22,9 +22,10 @@
     </div>
     <div class="content">
       <a-card
-        v-for="(item, index) in dataList"
+        v-for="(item, i) in dataList"
         class="card"
-        @click="handleSelectChat(item)"
+        :class="{click: index == i}"
+        @click="handleSelectChat(item, i)"
       >
         <div class="media">
           <div class="media-avatar">
@@ -49,6 +50,7 @@
       </a-card>
     </div>
     <plusFirendGroup ref="openPlusRef" />
+    <createGroup  ref="openGroupRef"/>
   </div>
 </template>
 <script setup lang="ts">
@@ -56,13 +58,16 @@ import { ref, onMounted, inject } from "vue";
 import { UserOutlined } from "@ant-design/icons-vue";
 import { sendMsg } from "@/utils/websocket";
 import plusFirendGroup from "@/views/home/components/viewsSoder/components/plusFirendGroup.vue";
+import createGroup from "@/views/home/components/viewsSoder/components/createGroup.vue";
 import { message } from "ant-design-vue";
 import { formatDate } from "@/utils/formatTime";
 import { isJsonString } from "@/utils/is";
 const visible = ref<boolean>(false);
 const value = ref<string>("");
 const openPlusRef = ref();
+const openGroupRef = ref();
 const dataList = ref<any>([]);
+const index = ref<any>()
 const clickChat = ref<any>();
 onMounted(() => {
   sendMsg("recentChatList", null); // 发送给客户端消息 recentChatList 获取最近聊天信息列表 （用户列表）
@@ -84,11 +89,15 @@ function getSocketData(data) {
 }
 
 // handlSelectChat 选择聊天对象
-const handleSelectChat = (item: any) => {
+const handleSelectChat = (item: any, i: number) => {
   // 从子组件传值到父组件值
+  index.value = i
   clickChat.value = item;
   emit("getValue", item);
 };
+const handleCreateGroup = () =>{
+  openGroupRef.value.showModal()
+}
 </script>
 <style scoped>
 .div1 {
@@ -131,6 +140,10 @@ const handleSelectChat = (item: any) => {
   margin-bottom: 3px;
 }
 .card:hover {
+  border: 1px solid rgb(24, 144, 255);
+  box-shadow: 0.5px 0.5px rgb(24, 144, 255);
+}
+.click {
   border: 1px solid rgb(24, 144, 255);
   box-shadow: 0.5px 0.5px rgb(24, 144, 255);
 }
