@@ -52,6 +52,7 @@ func (u *userFriendService) List(c *gin.Context) (userList []*response.UserFrien
 		userList = append(userList, &response.UserFriendListModelRes{
 			ID:           friend.FriendUser.ID,
 			Name:         friend.FriendUser.Name,
+			Identity:     friend.FriendUser.Identity,
 			Avatar:       friend.FriendUser.Avatar,
 			IsLogout:     friend.FriendUser.IsLogout == 2, // 2 说明在线
 			LoginOutTime: friend.FriendUser.LoginOutTime,

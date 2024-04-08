@@ -58,6 +58,16 @@ func (u *userControl) Login(c *gin.Context) {
 
 // UpdateUserBasic @Title 修改用户信息
 func (u *userControl) UpdateUserBasic(c *gin.Context) {
+	var input request.UserBasicUpdateReqInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response.ErrorResp(c).SetMsg(utility.GetVerErr(err)).WriteJsonExit()
+	}
+	err := service.UserBasicService.UpdateUserBasic(c, input)
+	if err != nil {
+		response.ErrorResp(c).WriteJsonExit()
+		return
+	}
+	response.SuccessResp(c).WriteJsonExit()
 
 }
 

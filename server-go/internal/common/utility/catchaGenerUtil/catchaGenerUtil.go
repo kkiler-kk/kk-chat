@@ -9,7 +9,7 @@ import (
 var store = b64.DefaultMemStore
 
 func CaptchaGenerate() (models.CaptchaData, error) {
-	driver := b64.NewDriverDigit(40, 100, 4, 0.7, 80)
+	driver := b64.NewDriverDigit(40, 100, 4, 0.2, 80)
 	captcha := b64.NewCaptcha(driver, store)
 	id, b64s, _, err := captcha.Generate()
 	if err != nil {

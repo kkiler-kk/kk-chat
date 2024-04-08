@@ -20,6 +20,16 @@ type UserBasicLoginReqInput struct {
 	Code     models.CaptchaData `from:"code" binding:"required"`
 }
 
+type UserBasicUpdateReqInput struct {
+	ID               int64  `from:"id" binding:"required"`
+	Avatar           string `from:"avatar" binding:"required"`
+	UserName         string `form:"username" binding:"required"`
+	Identity         string `form:"identity" binding:"required"`
+	Email            string `form:"email" binding:"required,email"`
+	VerificationCode string `form:"verificationCode" binding:"required"`
+	Phone            string `form:"phone"`
+}
+
 type UserSearchReqInput struct {
 	Type   uint   `from:"type" binding:"required" label:"类型"`
 	Search string `from:"search" binding:"required" label:"搜索内容"`

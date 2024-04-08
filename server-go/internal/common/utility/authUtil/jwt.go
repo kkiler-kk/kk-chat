@@ -16,8 +16,8 @@ type MyClaims struct {
 // 定义密钥
 const sign_key = "kk-chat"
 
-// 定义过期时间 2小时
-var expiresAt = config.Instance().Token.TimeOut * time.Hour
+// 定义过期时间
+var expiresAt = config.Instance().Token.TimeOut * time.Minute
 
 // 定义secret
 var MySecret = []byte(config.Instance().Token.EncryptKey)

@@ -39,10 +39,10 @@ func (u *userBasicService) CreateUserBasic(c *gin.Context, input request.UserBas
 		IsForbidden:   2,
 		IsAdmin:       2,
 	}
-	//code, err := redisUtil.Get(c, consts.CodeEmail+userBasicModel.Email)
-	//if err != nil || input.VerificationCode != code {
-	//	return errors.New("验证码过期 or 错误")
-	//}
+	code, err := redisUtil.Get(c, consts.CodeEmail+userBasicModel.Email)
+	if err != nil || input.VerificationCode != code {
+		return errors.New("验证码过期 or 错误")
+	}
 	temp, _ := dao.UserBasic.FindUniqueUserBasic(0, []string{"", userBasicModel.Email, ""})
 	if temp.ID != 0 {
 		return errors.New("邮箱已经存在了！")
@@ -150,6 +150,26 @@ func (u *userBasicService) Logout(c *gin.Context) (err error) {
 		LoginOutTime: time.Now(),
 	}
 	err = dao.UserBasic.Update(user)
+	return
+}
+
+// UpdateUserBasic @Title 更新用户信息
+func (u *userBasicService) UpdateUserBasic(c *gin.Context, input request.UserBasicUpdateReqInput) (err error) {
+	var userBasicModel = &models.UserBasic{
+		ID:       input.ID,
+		Name:     input.UserName,
+		Phone:    input.Phone,
+		Email:    input.Email,
+		Avatar:   input.Avatar,
+		Identity: input.Identity,
+	}
+	code, err := redisUtil.Get(c, consts.CodeEmail+userBasicModel.Email)
+	if code == "" && input.VerificationCode == "" { // 说明人家没想改邮箱
+		userBasicModel.Email = ""
+	} else if err != nil || input.VerificationCode != code {
+		return errors.New("验证码过期 or 错误")
+	}
+	err = dao.UserBasic.Update(userBasicModel)
 	return
 }
 

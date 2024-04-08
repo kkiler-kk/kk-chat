@@ -16,7 +16,7 @@ func SendEmailCode(receiveEmail string) string {
 	msg.SetHeader("Subject", "kkChat-验证码")
 
 	randomCode := utils.RandStr(6)
-	msg.SetBody("text/html", fmt.Sprintf("<b>这是你在kkChat注册验证码 次验证码三十分钟内有效 请不要告诉别人</b>\"%s\"", randomCode))
+	msg.SetBody("text/html", fmt.Sprintf("<b>这是你在kkChat验证码 次验证码三十分钟内有效 请不要告诉别人</b>\"%s\"", randomCode))
 	// msg.Attach("/home/User/cat.jpg")
 	// Send the email
 	if err := email.Instance().DialAndSend(msg); err != nil {

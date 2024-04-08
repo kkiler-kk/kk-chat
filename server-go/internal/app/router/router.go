@@ -9,4 +9,5 @@ func InitAppRouter(group *gin.RouterGroup) {
 	MessageRouter(groupNew)    // 加载消息路由 socket
 	FileRouter(groupNew)       // 加载文件路由
 	UserFriendRouter(groupNew) // 加载好友来路由
+	GroupRouter(groupNew)      // 加载群聊路由
 }

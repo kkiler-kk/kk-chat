@@ -1,7 +1,6 @@
 package control
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"server-go/internal/app/core/config"
 	"server-go/internal/app/models/response"
@@ -14,7 +13,6 @@ type fileControl struct {
 }
 
 func (f *fileControl) UploadFileImage(c *gin.Context) {
-	fmt.Println("uploadImages Hello World")
 	file, _ := c.FormFile("file")
 	dst := config.Instance().Server.ServerRoot + "/file/"
 	nowTime := utility.CreateDateDir(dst)

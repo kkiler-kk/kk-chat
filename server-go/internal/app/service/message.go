@@ -93,7 +93,6 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 	if err != nil {
 		log.Error().Msgf("消息存储mongodb错误 %s", id)
 	}
-
 	_ = redisUtil.Incr(c, redisCountKey) // 聊天总数 + 1
 }
 
@@ -111,7 +110,10 @@ func (m *messageService) MessageList(c *gin.Context, client *models.Client, req 
 	if err != nil {
 		return
 	}
-	targetUserMessageList, err := mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, fmt.Sprintf("%s->%s", models.GetUserKey(searchMessageInput.TargetId), models.GetUserKey(searchMessageInput.UserId)))
+	var targetUserMessageList []models.Trainer
+	if searchMessageInput.UserId != searchMessageInput.TargetId {
+		targetUserMessageList, err = mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, fmt.Sprintf("%s->%s", models.GetUserKey(searchMessageInput.TargetId), models.GetUserKey(searchMessageInput.UserId)))
+	}
 	if err != nil {
 		return
 	}
@@ -185,7 +187,6 @@ func (m *messageService) setRecentChat(c *gin.Context, id int64, userRecentModel
 }
 
 func (m *messageService) Ping(c *gin.Context, client *models.Client, req *models.WRequest) {
-	fmt.Println("ping: ", req.Event)
 	UserBasicService.UpdateHeartTime(client.User.ID) // 更新一下心跳时间
 	models.SendSuccess(client, req.Event)
 }
