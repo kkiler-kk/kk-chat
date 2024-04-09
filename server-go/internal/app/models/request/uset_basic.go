@@ -31,6 +31,5 @@ type UserBasicUpdateReqInput struct {
 }
 
 type UserSearchReqInput struct {
-	Type   uint   `from:"type" binding:"required" label:"类型"`
 	Search string `from:"search" binding:"required" label:"搜索内容"`
 }

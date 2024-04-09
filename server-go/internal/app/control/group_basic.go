@@ -35,6 +35,6 @@ func (g *groupControl) Add(c *gin.Context) {
 
 // FindGroupName @Title
 func (g *groupControl) FindGroupName(c *gin.Context) {
-	name := c.Param("name")
+	//name := c.Param("name")
 
 }
