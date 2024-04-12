@@ -67,6 +67,7 @@ const handleSendMsg = () => { // 发送消息
     message.error("请先登录!")
     return
   }
+  formState.value.type = props.clickChat.type
   formState.value.user = {
     id: userInfo.id,
     name: userInfo.name,

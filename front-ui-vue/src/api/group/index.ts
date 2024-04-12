@@ -8,3 +8,17 @@ export function groupAdd(data) {
         data: data,
     })
 }
+
+export function findByName(name: string) {
+    return request({
+        url: '/api/app/group/find/' +name,
+        method: "post",
+    })
+}
+
+export function listGroup() {
+    return request({
+        url: '/api/app/group/list',
+        method: 'post',
+    })
+}

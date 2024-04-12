@@ -21,6 +21,16 @@ func (u *groupMember) Update(groupMember *models.GroupMember) error {
 	return db.Instance().Model(&groupMember).Updates(groupMember).Error
 }
 
-func (u *groupMember) List() {
+// List @Title 返回群聊成员列表
+func (u *groupMember) List(member *models.GroupBasic) (memberList *models.GroupMember, err error) {
+	return
+}
 
+// IsGroupMember @Title 检查是否是群成员
+func (u *groupMember) IsGroupMember(groupID, userID int64) bool {
+	query := db.Instance()
+	query = query.Where("group_id = ?", groupID)
+	query = query.Where("user_id = ?", userID)
+	err := query.First(&models.GroupMember{}).Error
+	return err == nil // 没报错说明查询到了
 }

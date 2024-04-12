@@ -11,40 +11,47 @@
  Target Server Version : 80027
  File Encoding         : 65001
 
- Date: 02/04/2024 10:39:13
+ Date: 12/04/2024 18:05:26
 */
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Table structure for contact
--- ----------------------------
-DROP TABLE IF EXISTS `contact`;
-CREATE TABLE `contact`  (
-  `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `owner_id` bigint NULL DEFAULT NULL COMMENT '谁的关系',
-  `target_id` bigint NULL DEFAULT NULL COMMENT '对应着谁',
-  `type` int NULL DEFAULT NULL COMMENT '类型',
-  `desc` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '描述',
-  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
-  `updated_at` datetime NULL DEFAULT NULL COMMENT '修改时间',
-  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '联系人' ROW_FORMAT = Dynamic;
-
--- ----------------------------
 -- Table structure for group_basic
 -- ----------------------------
 DROP TABLE IF EXISTS `group_basic`;
 CREATE TABLE `group_basic`  (
-  `id` bigint NOT NULL COMMENT 'id',
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
   `owner_id` bigint NULL DEFAULT NULL COMMENT '群主',
-  `icon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '头像',
+  `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '头像',
   `type` int NULL DEFAULT NULL COMMENT '类型',
+  `identity` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'id 唯一标识(可能由系统分配或用户自定义)',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '群昵称',
   `desc` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '描述',
-  PRIMARY KEY (`id`) USING BTREE
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '修改时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `identity_unique`(`identity` ASC) USING BTREE COMMENT 'id唯一索引'
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '群聊分组' ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Table structure for group_member
+-- ----------------------------
+DROP TABLE IF EXISTS `group_member`;
+CREATE TABLE `group_member`  (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `group_id` bigint NULL DEFAULT NULL COMMENT '群id',
+  `user_id` bigint NULL DEFAULT NULL COMMENT '用户id',
+  `type` int NULL DEFAULT NULL COMMENT '类型',
+  `is_admin` int NULL DEFAULT NULL COMMENT '是否是管理员 1 yes 2 no ',
+  `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime NULL DEFAULT NULL COMMENT '修改时间',
+  `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `member_unique`(`group_id` ASC, `user_id` ASC) USING BTREE COMMENT '成员唯一索引'
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '群成员' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for message
@@ -94,7 +101,7 @@ CREATE TABLE `user_basic`  (
   UNIQUE INDEX `unique_email`(`email` ASC) USING BTREE COMMENT '唯一邮箱',
   UNIQUE INDEX `unique_id`(`identity` ASC) USING BTREE COMMENT '唯一id',
   UNIQUE INDEX `unique_phone`(`phone` ASC) USING BTREE COMMENT '唯一手机号'
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户基础信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户基础信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Table structure for user_black_list
@@ -122,8 +129,9 @@ CREATE TABLE `user_friends`  (
   `created_at` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime NULL DEFAULT NULL COMMENT '修改时间',
   `deleted_at` datetime NULL DEFAULT NULL COMMENT '删除时间',
+  `type` int NULL DEFAULT 1 COMMENT '类型 1 好友 2 群聊',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `user_id`(`user_id` ASC, `friend_id` ASC) USING BTREE COMMENT '唯一'
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户好友表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '用户好友表' ROW_FORMAT = Dynamic;
 
 SET FOREIGN_KEY_CHECKS = 1;

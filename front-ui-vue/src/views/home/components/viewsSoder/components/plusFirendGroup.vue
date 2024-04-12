@@ -14,17 +14,28 @@
             />
           </div>
           <div>
-            <a-empty v-if="dataList.length == 0"/>
+            <a-empty v-if="dataList.length == 0" />
             <div v-else>
               <div class="friendBox">
                 <div v-for="item in dataList" :key="item.id" class="friend">
-                 <div class="left">
-                  <a-avatar :src="item.avatar" shape="square" :size="64"/>
-                 </div>
-                 <div class="right">
-                  <p><span>{{ item.name }} (<span style="color:red;">{{ item.identity }}</span>)</span></p>
-                  <p v-if="!item.isFriend"><a-button type="primary" @click="handleAddFriend(item)">加好友</a-button></p>
-                 </div>
+                  <div class="left">
+                    <a-avatar :src="item.avatar" shape="square" :size="64" />
+                  </div>
+                  <div class="right">
+                    <p>
+                      <span
+                        >{{ item.name }} (<span style="color: red">{{
+                          item.identity
+                        }}</span
+                        >)</span
+                      >
+                    </p>
+                    <p v-if="!item.isFriend">
+                      <a-button type="primary" @click="handleAddFriend(item)"
+                        >加好友</a-button
+                      >
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -36,10 +47,39 @@
               size="large"
               class="search"
               v-model:value="form.search"
-              placeholder="群ID"
+              placeholder="群ID/群昵称"
               enter-button
-            /></div
-        ></a-tab-pane>
+              @search="onSearch"
+            />
+          </div>
+          <div>
+            <a-empty v-if="dataList.length == 0" />
+            <div v-else>
+              <div class="friendBox">
+                <div v-for="item in dataList" :key="item.id" class="friend">
+                  <div class="left">
+                    <a-avatar :src="item.avatar" shape="square" :size="64" />
+                  </div>
+                  <div class="right">
+                    <p>
+                      <span
+                        >{{ item.name }} (<span style="color: red">{{
+                          item.identity
+                        }}</span
+                        >)</span
+                      >
+                    </p>
+                    <p v-if="!item.isFriend">
+                      <a-button type="primary" @click="handleAddFriend(item)"
+                        >加群</a-button
+                      >
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a-tab-pane>
       </a-tabs>
     </a-modal>
   </div>
@@ -47,7 +87,8 @@
 <script setup lang="ts">
 import { Modal, message } from "ant-design-vue";
 import { ref, createVNode } from "vue";
-import {addFriend} from '@/api/userFriend/userFriend'
+import { addFriend } from "@/api/userFriend/userFriend";
+import { findByName } from "@/api/group";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { userSearch } from "@/api/userBasic/userBasic";
 import { Session } from "@/utils/storage";
@@ -68,17 +109,19 @@ const handleOk = (e: MouseEvent) => {
   open.value = false;
 };
 const handleAddFriend = (item) => {
-  let userInfo = Session.get("userInfo")
+  let userInfo = Session.get("userInfo");
   let data = {
     userId: userInfo.id,
     friendId: item.id,
-  }
-  addFriend(data).then((res) => {
-      message.success("添加成功")
-  }).catch((err) => {
-    message.error("添加失败", err)
-  })
-}
+  };
+  addFriend(data)
+    .then((res) => {
+      message.success("添加成功");
+    })
+    .catch((err) => {
+      message.error("添加失败", err);
+    });
+};
 const onSearch = (searchValue: string) => {
   console.log("use value", searchValue);
   if (form.value.type == 1) {
@@ -88,6 +131,11 @@ const onSearch = (searchValue: string) => {
         dataList.value = res;
       })
       .catch((err) => {});
+  } else {
+    // 2 找群聊
+    findByName(form.value.search).then((res) => {
+      dataList.value = res;
+    });
   }
 };
 //暴露state和play方法
@@ -99,9 +147,9 @@ defineExpose({
 <style scoped>
 .friendBox {
   width: 100%;
-  display: flex; 
-  margin-top:5px; 
-  flex-wrap:wrap;
+  display: flex;
+  margin-top: 5px;
+  flex-wrap: wrap;
 }
 .friend {
   /* background-color: rgb(243, 242, 239); */
@@ -112,7 +160,7 @@ defineExpose({
   float: left;
   display: inline;
 }
-.right{
+.right {
   /* margin-right: 10px; */
 }
 </style>

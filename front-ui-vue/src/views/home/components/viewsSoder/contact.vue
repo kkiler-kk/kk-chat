@@ -21,13 +21,45 @@
       />
     </div>
     <div class="content">
+      <div>
+        <div style="float: left">
+          <h6>*</h6>
+        </div>
+        <div
+          v-for="(item, i) in groupList"
+          class="card"
+          :class="{ click: index == item.id }"
+          @click="handleSelectChat(item, item.id, 2)"
+        >
+          <div class="media">
+            <div class="media-avatar">
+                <a-avatar shape="square" class="avatar" size="large" :src="item.avatar" />
+            </div>
+            <div style="margin-top: 10px">
+              <div clas="d-flex align-items-center mb-1">
+                <h6 class="text-truncate mb-0 me-auto">{{ item.name }}</h6>
+                <!-- <p class="small text-muted text-nowrap ms-4 mb-0">11:08 am</p> -->
+              </div>
+              <div class="text-truncate">{{ item.countMember }} 成员</div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div v-for="(item, o) in data" :key="index">
-        <div style="float: left; "> <h6>{{ item.type }}</h6></div>
-        <div v-for="(l, i) in item.list" :key="l.id" class="card"  :class="{click: index == l.id}" @click="handleSelectChat(l,l.id)">
+        <div style="float: left">
+          <h6>{{ item.type }}</h6>
+        </div>
+        <div
+          v-for="(l, i) in item.list"
+          :key="l.id"
+          class="card"
+          :class="{ click: index == l.id }"
+          @click="handleSelectChat(l, l.id, 1)"
+        >
           <div class="media">
             <div class="media-avatar">
               <a-badge dot :color="l.isLogout ? 'green' : 'rgb(204, 204, 204)'">
-                <a-avatar shape="square" class="avatar" size="large" :src="l.avatar"/>
+                <a-avatar shape="square" class="avatar" size="large" :src="l.avatar" />
               </a-badge>
             </div>
             <div style="margin-top: 10px">
@@ -36,7 +68,7 @@
                 <!-- <p class="small text-muted text-nowrap ms-4 mb-0">11:08 am</p> -->
               </div>
               <div class="text-truncate">
-                {{ l.isLogout ? '' : formatPast(l.loginOutTime) }} 在线
+                {{ l.isLogout ? "" : formatPast(l.loginOutTime) }} 在线
               </div>
             </div>
           </div>
@@ -50,21 +82,23 @@
 import { ref, onMounted } from "vue";
 import { listFriend } from "@/api/userFriend/userFriend";
 import pinyin from "js-pinyin";
-import {formatPast} from '@/utils/formatTime'
+import { listGroup } from "@/api/group/index";
+import { formatPast } from "@/utils/formatTime";
 import plusFirendGroup from "@/views/home/components/viewsSoder/components/plusFirendGroup.vue";
 
-const clickChat = ref<any>()
+const clickChat = ref<any>();
 const visible = ref<boolean>(false);
 const value = ref<string>("");
 const openPlusRef = ref();
-const index = ref<number>()
+const index = ref<number>();
 const data = ref<any>();
-
-const emit = defineEmits(["getValue"])
+const groupList = ref<any>();
+const emit = defineEmits(["getValue"]);
 
 onMounted(() => {
   pinyin.setOptions({ charCase: 1 });
   handleListFriend();
+  handleListGroup();
 });
 const onSearch = (searchValue: string) => {
   console.log("use value", searchValue);
@@ -84,17 +118,24 @@ const handleListFriend = () => {
     data.value = filterName(scenicData);
   });
 };
+const handleListGroup = () => {
+  listGroup().then((res: any) => {
+    groupList.value = res;
+    console.log("groupList", groupList.value);
+  });
+};
 const handleOpenPlus = () => {
   openPlusRef.value.showModal();
 };
 
 // handlSelectChat 选择聊天对象
-const handleSelectChat = (item :any, i: number) => {  // 从子组件传值到父组件值
-  clickChat.value = item
-  index.value = i
-  emit("getValue", item)
-}
-
+const handleSelectChat = (item: any, i: number, type: number) => {
+  // 从子组件传值到父组件值
+  clickChat.value = item;
+  clickChat.value.type = type
+  index.value = i;
+  emit("getValue", clickChat.value);
+};
 
 const filterName = (list) => {
   let letterArray = [];
@@ -180,6 +221,4 @@ h6 {
   font-weight: normal;
   font-size: 1rem;
 }
-
-
 </style>

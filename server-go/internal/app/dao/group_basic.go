@@ -21,24 +21,41 @@ func (u *groupBasic) Update(group *models.GroupBasic) error {
 	return db.Instance().Model(&group).Updates(group).Error
 }
 
-// List @Title 返回群聊消息
-func (u *groupBasic) List(group *models.GroupBasic) (list []*models.GroupBasic, err error) {
+// List @Title 返回好友分组
+func (u *groupBasic) List(userId int64) (list []*models.GroupBasic, err error) {
 	query := db.Instance()
 	var groupIds []int64
-	if group.Name != "" {
-		query = query.Where("name  like ?", group.Name+"%")
+	var groupMember []*models.GroupMember
+	err = db.Instance().Where("user_id = ?", userId).Find(&groupMember).Error
+	if err != nil {
+		return
 	}
-	if group.OwnerId != 0 {
-		var groupMember []*models.GroupMember
-		err = db.Instance().Where("user_id = ?", group.OwnerId).Find(&groupMember).Error
-		if err != nil {
-			return
-		}
-		for _, member := range groupMember {
-			groupIds = append(groupIds, member.GroupID)
-		}
-		query = query.Where("owner_id = ?", group.OwnerId)
+	for _, member := range groupMember {
+		groupIds = append(groupIds, member.GroupID)
 	}
+	query = query.Where("owner_id = ?", userId)
 	err = query.Where("id in(?)", groupIds).Find(&list).Error
 	return
+}
+
+// FindByName @Title 通过name 查询群聊
+func (u *groupBasic) FindByName(group *models.GroupBasic) (list []*models.GroupBasic, err error) {
+	query := db.Instance().Debug()
+	if group.Name != "" {
+		query = query.Or("name like ?", group.Name+"%")
+	}
+	if group.Identity != "" {
+		query = query.Or("identity like ?", group.Identity+"%")
+	}
+	err = query.Find(&list).Error
+	return
+}
+
+// IsGroupAdmin @Title  检查是否是群主
+func (u *groupBasic) IsGroupAdmin(groupID, userID int64) bool {
+	query := db.Instance()
+	query = query.Where("group_id = ?", groupID)
+	query = query.Where("owner_id = ?", userID)
+	err := query.First(&models.GroupBasic{}).Error
+	return err == nil // 没报错说明查询到了
 }

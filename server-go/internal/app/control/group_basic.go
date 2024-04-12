@@ -21,8 +21,8 @@ func (g *groupControl) Add(c *gin.Context) {
 		response.ErrorResp(c).WriteJsonExit()
 		return
 	}
-	if input.Icon == "" {
-		input.Icon = "http:" + c.Request.Host + "/resource/public/file/default/member.png" // 默认头像
+	if input.Avatar == "" {
+		input.Avatar = "http://" + c.Request.Host + "/resource/public/file/default/member.png" // 默认头像
 	}
 	err := service.GroupService.CreateGroupMember(input)
 	if err != nil {
@@ -33,8 +33,32 @@ func (g *groupControl) Add(c *gin.Context) {
 	response.SuccessResp(c).WriteJsonExit()
 }
 
-// FindGroupName @Title
+// List @Title 返回用户群聊
+func (g *groupControl) List(c *gin.Context) {
+	userId, _ := c.Get("id")
+	list, err := service.GroupService.List(userId.(int64))
+
+	if err != nil {
+		log.Error().Err(err)
+		response.ErrorResp(c).WriteJsonExit()
+		return
+	}
+	response.SuccessResp(c).SetData(list).WriteJsonExit()
+
+}
+
+// FindGroupName @Title  查询 群聊
 func (g *groupControl) FindGroupName(c *gin.Context) {
-	//name := c.Param("name")
+	name := c.Param("name")
+	list, err := service.GroupService.FindGroupName(c, name)
+	if err != nil {
+		response.ErrorResp(c).WriteJsonExit()
+		return
+	}
+	response.SuccessResp(c).SetData(list).WriteJsonExit()
+}
+
+// JoinGroup @Title 加入群聊
+func (g *groupControl) JoinGroup(c *gin.Context) {
 
 }
