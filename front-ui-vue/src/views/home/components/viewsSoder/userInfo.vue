@@ -48,9 +48,7 @@
   <updateUserInfo ref="updateUserInfoRef"/>
 </template>
 <script setup lang="ts">
-import logo from "@/assets/images/chat.png";
 import cover from "@/assets/images/login.jpg";
-import { detail } from "@/api/userBasic/userBasic";
 import { onMounted } from "vue";
 import { Session } from "@/utils/storage";
 import { logout } from "@/api/userBasic/userBasic";
@@ -71,20 +69,14 @@ const spinning = ref<boolean>(true);
 const updateUserInfoRef = ref()
 onMounted(() => {
   let user = Session.get("userInfo");
+  console.log('user: ', user)
   spinning.value = true;
   if (user == null) {
     spinning.value = false;
     return;
   }
-  detail(user.id)
-    .then((res) => {
-      userInfo.value = res;
-      Session.set("userInfo", userInfo.value);
-      spinning.value = false;
-    })
-    .catch((err) => {
-      spinning.value = false;
-    });
+  userInfo.value = user
+  spinning.value = false
 });
 // 退出登录
 const handlLogout = () => {

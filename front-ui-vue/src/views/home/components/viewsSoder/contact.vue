@@ -37,7 +37,7 @@
             </div>
             <div style="margin-top: 10px">
               <div clas="d-flex align-items-center mb-1">
-                <h6 class="text-truncate mb-0 me-auto">{{ item.name }}</h6>
+                <h6 class="text-truncate mb-0 me-auto">{{ item.name }}({{ item.identity }})</h6>
                 <!-- <p class="small text-muted text-nowrap ms-4 mb-0">11:08 am</p> -->
               </div>
               <div class="text-truncate">{{ item.countMember }} 成员</div>

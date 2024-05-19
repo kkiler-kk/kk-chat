@@ -68,6 +68,7 @@ func (g *groupService) FindGroupName(c *gin.Context, name string) (result []*res
 			Avatar:   temp.Avatar,
 			Name:     temp.Name,
 			Identity: temp.Identity,
+			
 			IsFriend: false,
 		}
 	}

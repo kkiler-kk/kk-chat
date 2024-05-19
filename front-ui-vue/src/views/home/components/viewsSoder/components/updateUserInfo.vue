@@ -133,22 +133,6 @@ const url = ref(import.meta.env.VITE_API_URL + "api/app/file/upload/image");
 const loading = ref<boolean>(false);
 
 onMounted(() => {
-  let userInfo = Session.get("userInfo");
-  if (userInfo == null) {
-    return
-  }
-  formState.id = userInfo.id;
-  detail(formState.id)
-    .then((res) => {
-      formState.id = res.id;
-      formState.username = res.name;
-      formState.phone = res.phone;
-      formState.identity = res.identity;
-      formState.email = res.email;
-      formState.avatar = res.avatar;
-    })
-    .catch((err) => {
-    });
 });
 
 
@@ -221,6 +205,22 @@ const handleChange = (info: UploadChangeParam) => {
 };
 const showModal = () => {
   open.value = true;
+  let userInfo = Session.get("userInfo");
+  if (userInfo == null) {
+    return
+  }
+  formState.id = userInfo.id;
+  detail(formState.id.toString())
+    .then((res) => {
+      formState.id = res.id;
+      formState.username = res.name;
+      formState.phone = res.phone;
+      formState.identity = res.identity;
+      formState.email = res.email;
+      formState.avatar = res.avatar;
+    })
+    .catch((err) => {
+    });
 };
 const hideModal = () => {
   open.value = false;

@@ -34,3 +34,11 @@ func (u *groupMember) IsGroupMember(groupID, userID int64) bool {
 	err := query.First(&models.GroupMember{}).Error
 	return err == nil // 没报错说明查询到了
 }
+
+// CountMember @Title 返回群人员总数
+func (u *groupMember) CountMember(groupID int64) (count *int64) {
+	query := db.Instance()
+	query = query.Where("group_id = ?", groupID)
+	query.Model(models.GroupMember{}).Count(count)
+	return count // 为什么 + 1 呢? 因为群主也是群成员啊
+}

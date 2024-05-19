@@ -23,10 +23,10 @@ func (u *groupBasic) Update(group *models.GroupBasic) error {
 
 // List @Title 返回好友分组
 func (u *groupBasic) List(userId int64) (list []*models.GroupBasic, err error) {
-	query := db.Instance()
+	query := db.Instance().Debug()
 	var groupIds []int64
 	var groupMember []*models.GroupMember
-	err = db.Instance().Where("user_id = ?", userId).Find(&groupMember).Error
+	err = db.Instance().Debug().Where("user_id = ?", userId).Find(&groupMember).Error
 	if err != nil {
 		return
 	}
@@ -34,7 +34,7 @@ func (u *groupBasic) List(userId int64) (list []*models.GroupBasic, err error) {
 		groupIds = append(groupIds, member.GroupID)
 	}
 	query = query.Where("owner_id = ?", userId)
-	err = query.Where("id in(?)", groupIds).Find(&list).Error
+	err = query.Or("id in(?)", groupIds).Find(&list).Error
 	return
 }
 

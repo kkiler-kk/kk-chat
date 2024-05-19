@@ -40,7 +40,7 @@ type Client struct {
 	CloseSignal   chan struct{}   // 关闭信号
 	FirstTime     uint64          // 首次连接时间
 	HeartbeatTime uint64          // 用户上次心跳时间
-	Tags          []string        // 标签
+	Tags          []int64         // 标签  群聊id若有次id 就推送消息
 	User          *UserBasic      // 用户信息
 	context       *gin.Context    // Custom context for internal usage purpose.
 	IP            string          // 客户端IP
