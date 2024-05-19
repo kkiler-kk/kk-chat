@@ -32,7 +32,7 @@
  - 设置 (未完成)
 
 #### 效果图
-![](server-go/resource/public/file/default/constact.png "")
-![](server-go/resource/public/file/default/find friend.png "")
-![](server-go/resource/public/file/default/chat.png "")
-![](server-go/resource/public/file/default/userInfo.png "")
+![](server-go/resource/public/default/constact.png "")
+![](server-go/resource/public/default/find friend.png "")
+![](server-go/resource/public/default/chat.png "")
+![](server-go/resource/public/default/userInfo.png "")
