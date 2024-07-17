@@ -22,7 +22,7 @@ func (g *groupControl) Add(c *gin.Context) {
 		return
 	}
 	if input.Avatar == "" {
-		input.Avatar = "http://" + c.Request.Host + "/resource/public/file/default/member.png" // 默认头像
+		input.Avatar = "http://" + c.Request.Host + "/resource/public/file/default/member.jpg" // 默认头像
 	}
 	err := service.GroupService.CreateGroupMember(input)
 	if err != nil {

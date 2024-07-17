@@ -53,8 +53,8 @@ func (u *groupBasic) FindByName(group *models.GroupBasic) (list []*models.GroupB
 
 // IsGroupAdmin @Title  检查是否是群主
 func (u *groupBasic) IsGroupAdmin(groupID, userID int64) bool {
-	query := db.Instance()
-	query = query.Where("group_id = ?", groupID)
+	query := db.Instance().Debug()
+	query = query.Where("id = ?", groupID)
 	query = query.Where("owner_id = ?", userID)
 	err := query.First(&models.GroupBasic{}).Error
 	return err == nil // 没报错说明查询到了

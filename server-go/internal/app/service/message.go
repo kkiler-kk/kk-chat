@@ -68,9 +68,12 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 	}
 	message.CreateTime = time.Now()
 	m.RecentChatList(c, client, nil) // 刷新一下自己聊天记录
-	if message.Type == 1 {
+	id := ""
+	if message.Type == 1 { // 1 为私聊
+		// 私聊情况key为这样 type:? 类型1 -> 2 发消息
+		id = fmt.Sprintf("type:%d--%s->%s", message.Type, models.GetUserKey(message.UserId), models.GetUserKey(message.TargetId))
 		// 检擦是不是好友关系
-		if !UserFriendService.IsFriend(message.UserId, message.TargetId) { // TODO 默认为私聊 暂时不做群聊处理
+		if !UserFriendService.IsFriend(message.UserId, message.TargetId) {
 			count, _ := strconv.ParseInt(countStr, 10, 64) // 转化为 int64
 			if count >= 3 {                                // 如果不是好友关系并且发送消息超过大于等于三条 直接return
 				wResponse.ErrorMsg = "非好友关系 发送信息超过三条 请添加好友再进行聊天"
@@ -78,21 +81,21 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 				return
 			}
 		}
-	} else if !GroupService.IsGroupExist(message.TargetId, message.UserId) { // 不是好友关系 也不是群成员 直接return
-		return
+		targetClient, ok := models.GetClientManager().IdInClient(models.GetUserKey(message.TargetId)) // 检查对方客户端是否在线
+		if ok {                                                                                       // 说明客户端在线
+			targetClient.SendMsg(wResponse) // 直接发送消息给客户端
+		}
+		client.SendMsg(wResponse) // 给客户端发送
+	} else if message.Type == 2 && GroupService.IsGroupExist(message.TargetId, message.UserId) { // 群聊关系 并且 是群里成员
+		// 群聊id  key 为type:&d--%s 其中%s为群聊id
+		id = fmt.Sprintf("type:%d->%s", message.Type, models.GetUserKey(message.TargetId))
 	}
 	wResponse.Event = "sendMessage"
 	wResponse.Code = 200
 	wResponse.Data = message
-	targetClient, ok := models.GetClientManager().IdInClient(models.GetUserKey(message.TargetId))
-	if ok { // 说明客户端在线
-		targetClient.SendMsg(wResponse) // 直接发送消息给客户端
-	}
-	client.SendMsg(wResponse)                                                                                                    // 给客户端发送
-	_ = m.settingRecentChat(c, message)                                                                                          //设置最近聊天列表
-	id := fmt.Sprintf("type:%d----%s->%s", message.Type, models.GetUserKey(message.UserId), models.GetUserKey(message.TargetId)) // 1 -> 2 发消息
-	b, _ := json.Marshal(message)                                                                                                // 将struct 转化为string 存储到mongodb
-	err := mongoUtils.Insert(c, config.Instance().Mongo.Database, id, string(b), int64(3*consts.Month))                          // 插入到mongodb 默认三个月过期
+	_ = m.settingRecentChat(c, message)                                                                 //设置最近聊天列表
+	b, _ := json.Marshal(message)                                                                       // 将struct 转化为string 存储到mongodb
+	err := mongoUtils.Insert(c, config.Instance().Mongo.Database, id, string(b), int64(3*consts.Month)) // 插入到mongodb 默认三个月过期
 	if err != nil {
 		log.Error().Msgf("消息存储mongodb错误 %s", id)
 	}
@@ -108,19 +111,22 @@ func (m *messageService) MessageList(c *gin.Context, client *models.Client, req 
 	}
 
 	// 获取两个消息
-	userMessageList, err := mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, fmt.Sprintf("%s->%s", models.GetUserKey(searchMessageInput.UserId), models.GetUserKey(searchMessageInput.TargetId)))
-	if err != nil {
-		return
+	mongoChatKey := fmt.Sprintf("type:%d--%s->%s", searchMessageInput.Type, models.GetUserKey(searchMessageInput.UserId), models.GetUserKey(searchMessageInput.TargetId))
+	var userMessageList []models.Trainer           // 自己发送的消息
+	var targetUserMessageList []models.Trainer     // 对方发送的消息
+	var messageList []*request.SendMessageInputReq // 消息合并 and 返回消息结构体
+	if searchMessageInput.Type == 2 {              // 2 说明群聊
+		// type: %d 2 群聊 第二个参数是群聊的id 这样就可以直接获取到参数 也就是 群聊key 是这样的 type:2--1 私聊key是这样的 type:1--1-->2
+		mongoChatKey = fmt.Sprintf("type:%d->%s", searchMessageInput.Type, models.GetUserKey(searchMessageInput.TargetId))
+	} else { // 私聊需要获取对方的消息
+		if searchMessageInput.UserId != searchMessageInput.TargetId {
+			targetUserMessageList, _ = mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, fmt.Sprintf("type:%d--%s->%s", searchMessageInput.Type, models.GetUserKey(searchMessageInput.TargetId), models.GetUserKey(searchMessageInput.UserId)))
+		}
 	}
-	var targetUserMessageList []models.Trainer
-	if searchMessageInput.UserId != searchMessageInput.TargetId {
-		targetUserMessageList, err = mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, fmt.Sprintf("%s->%s", models.GetUserKey(searchMessageInput.TargetId), models.GetUserKey(searchMessageInput.UserId)))
-	}
-	if err != nil {
-		return
-	}
+	userMessageList, _ = mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, mongoChatKey)
+	//  消息合并
 	mergeArr := append(userMessageList, targetUserMessageList...) // 合并数组
-	messageList := make([]*request.SendMessageInputReq, len(mergeArr))
+	messageList = make([]*request.SendMessageInputReq, len(mergeArr))
 	for i, message := range mergeArr { // 把字符串消息转换一下
 		var revMsg *request.SendMessageInputReq
 		_ = json.Unmarshal([]byte(message.Content), &revMsg)

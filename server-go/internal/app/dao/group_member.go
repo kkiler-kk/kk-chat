@@ -28,7 +28,7 @@ func (u *groupMember) List(member *models.GroupBasic) (memberList *models.GroupM
 
 // IsGroupMember @Title 检查是否是群成员
 func (u *groupMember) IsGroupMember(groupID, userID int64) bool {
-	query := db.Instance()
+	query := db.Instance().Debug()
 	query = query.Where("group_id = ?", groupID)
 	query = query.Where("user_id = ?", userID)
 	err := query.First(&models.GroupMember{}).Error

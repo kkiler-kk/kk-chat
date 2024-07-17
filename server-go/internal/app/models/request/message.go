@@ -19,6 +19,7 @@ type UserOrGroupInfo struct {
 }
 
 type ListMessageInput struct {
+	Type     int   `json:"type"`
 	TargetId int64 `json:"targetId"`
 	UserId   int64 `json:"userId"`
 }
