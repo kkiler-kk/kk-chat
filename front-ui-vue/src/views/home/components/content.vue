@@ -57,9 +57,11 @@ onMounted(() => {
 watch(
   () => props.clickChat,
   (newVal, oldVal) => {
+    console.log("props.clickChat", props.clickChat)
     let data = {
       targetId: newVal.id,
       userId: userInfo.value.id,
+      type: props.clickChat.type,
     };
     sendMsg("messageList", data); // 发送给客户端消息 recentChatList 获取最近聊天信息列表 （用户列表）
   }

@@ -29,9 +29,10 @@
       >
         <div class="media">
           <div class="media-avatar">
-            <a-badge dot :color="item.isLogout ? 'green' : 'rgb(204, 204, 204)'">
+            <a-badge dot :color="item.isLogout ? 'green' : 'rgb(204, 204, 204)'" v-if="item.type == 1">
               <a-avatar shape="square" class="avatar" size="large" :src="item.avatar" />
             </a-badge>
+            <a-avatar v-else shape="square" class="avatar" size="large" :src="item.avatar" />
           </div>
           <div style="margin-top: 10px">
             <div clas="d-flex align-items-center mb-1">
@@ -39,7 +40,7 @@
                 {{ item.name }}
               </h6>
               <p class="small text-muted text-nowrap ms-4 mb-0" style="float: right">
-                {{ formatDate(new Date(item.createdAt), "YYYY-mm-dd HH:MM") }}
+                {{ formatPast(new Date(item.createdAt), "YYYY-mm-dd HH:MM") }}
               </p>
             </div>
             <div class="text-truncate" style="float: left">
@@ -60,7 +61,7 @@ import { sendMsg } from "@/utils/websocket";
 import plusFirendGroup from "@/views/home/components/viewsSoder/components/plusFirendGroup.vue";
 import createGroup from "@/views/home/components/viewsSoder/components/createGroup.vue";
 import { message } from "ant-design-vue";
-import { formatDate } from "@/utils/formatTime";
+import { formatPast } from "@/utils/formatTime";
 import { isJsonString } from "@/utils/is";
 const visible = ref<boolean>(false);
 const value = ref<string>("");
@@ -93,6 +94,7 @@ const handleSelectChat = (item: any, i: number) => {
   // 从子组件传值到父组件值
   index.value = i
   clickChat.value = item;
+  clickChat.value.type = item.type
   emit("getValue", item);
 };
 const handleCreateGroup = () =>{

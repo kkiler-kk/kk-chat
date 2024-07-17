@@ -137,7 +137,7 @@ const handleSelectChat = (item: any, i: number, type: number) => {
   emit("getValue", clickChat.value);
 };
 
-const filterName = (list) => {
+const filterName = (list: any) => {
   let letterArray = [];
   for (let i = 65; i < 91; i++) {
     letterArray.push(String.fromCharCode(i));
