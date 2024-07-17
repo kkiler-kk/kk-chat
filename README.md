@@ -3,7 +3,8 @@
 #### 使用技术
 > 后端
 > -  mysql 做为数据存储
-> - Redis 存储消息数据 信息发布订阅
+> - Redis 存储消息数据 和最近聊天列表
+> - mongoDB 存储消息
 > - gin web框架
 > - websocket 保持长连接网页通讯
 > 
