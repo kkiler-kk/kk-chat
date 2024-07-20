@@ -33,6 +33,11 @@ func init() { // 初始化 websocket 路由
 	RoutersFun["messageList"] = MessageService.MessageList       // 返回消息列表
 }
 
+// TODO 优化代码
+// TODO 给对方发消息 对方最近聊天列表不刷新问题
+// TODO 长链接问题 心跳还是没弄好
+// TODO 前端接受到消息 点击的聊天选择会乱 这是个问题
+
 // RecentChatList @Title 返回最近的聊天列表
 func (m *messageService) RecentChatList(c *gin.Context, client *models.Client, req *models.WRequest) {
 	str, _ := redisUtil.HGet(c, consts.RecentChat, client.ID).Result()
@@ -82,8 +87,11 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 			}
 		}
 		targetClient, ok := models.GetClientManager().IdInClient(models.GetUserKey(message.TargetId)) // 检查对方客户端是否在线
-		if ok {                                                                                       // 说明客户端在线
+		if ok {
+			// 说明客户端在线
 			targetClient.SendMsg(wResponse) // 直接发送消息给客户端
+			// 更新对方客户端最近聊天列表
+			m.RecentChatList(c, targetClient, req)
 		}
 		client.SendMsg(wResponse) // 给客户端发送
 	} else if message.Type == 2 && GroupService.IsGroupExist(message.TargetId, message.UserId) { // 群聊关系 并且 是群里成员

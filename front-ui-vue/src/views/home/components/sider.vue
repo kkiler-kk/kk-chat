@@ -51,7 +51,7 @@ import {
 import UserInfo from "@/views/home/components/viewsSoder/userInfo.vue";
 import Setting from "@/views/home/components/viewsSoder/setting.vue";
 import Like from "@/views/home/components/viewsSoder/like.vue";
-import Message from "@/views/home/components/viewsSoder/message.vue";
+import Message from "@/views/home/components/viewsSoder/recentMessage.vue";
 import Contact from "@/views/home/components/viewsSoder/contact.vue";
 import { ref, onMounted,watch } from "vue";
 import { Session } from "@/utils/storage";

@@ -8,21 +8,22 @@ import (
 )
 
 func TestName(t *testing.T) {
-	var newArr = make([]int, 0)
-	ch := make(chan []int)
-	go func() {
-		arr1, _ := f1()
-		ch <- arr1
-		arr2, _ := f2()
-		ch <- arr2
-		arr3, _ := f3()
-		ch <- arr3
-		close(ch)
-	}()
-	for value := range ch {
-		newArr = ArrayIntersection(newArr, value)
+	var nums = []int{2, 7, 11, 15}
+	var target = 9
+	newNums := twoSum(nums, target)
+	fmt.Println(newNums)
+}
+func twoSum(nums []int, target int) []int {
+	var capMap = make(map[int]int)
+	size := len(nums)
+	for i := 0; i < size; i++ {
+		value, ok := capMap[target-nums[i]]
+		if ok {
+			return []int{i, value}
+		}
+		capMap[nums[i]] = i
 	}
-	fmt.Println(newArr)
+	return []int{-1, -1}
 }
 
 // 合并数组去重

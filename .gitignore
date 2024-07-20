@@ -5,3 +5,4 @@ front-ui-vue/node_modules
 server-go/mainifest/config/app.toml
 server-go/resource/public/file/
 server-go/.idea
+.gitignore
