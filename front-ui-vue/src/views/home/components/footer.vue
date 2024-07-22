@@ -1,12 +1,8 @@
 <template>
   <div style="display: flex">
     <div style="width: 80%; margin-right: 20px;">
-      <a-input
-        v-model:value="formState.content"
-        :bordered="false"
-        placeholder="请输入消息..."
-        @keyup.enter="handleSendMsg"
-      />
+      <a-input v-model:value="formState.content" :bordered="false" placeholder="请输入消息..."
+        @keyup.enter="handleSendMsg" />
     </div>
     <div style="margin-right: 20px;">
       <a-button type="primary" shape="circle">
@@ -20,14 +16,13 @@
       </a-button>
     </div>
 
-    <VEmojiPicker @select="selectEmoji" />
   </div>
 </template>
 <script lang="ts" setup>
 import { ref } from "vue";
-import { MehOutlined,ArrowRightOutlined } from "@ant-design/icons-vue";
+import { MehOutlined, ArrowRightOutlined } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
-import { sendMsg,getSocket } from "@/utils/websocket";
+import { sendMsg, getSocket } from "@/utils/websocket";
 import { Session } from "@/utils/storage";
 interface DataItem {
   content: string; // 发送内容
@@ -45,8 +40,9 @@ interface UserInfo {
 interface Props {
   clickChat?: any
 }
-const props =  defineProps<Props>()
- 
+const props = defineProps<Props>()
+
+
 const formState = ref<DataItem>({
   content: "",  // 发送内容
   userId: 0, // 发送人id
@@ -56,11 +52,11 @@ const formState = ref<DataItem>({
 
 const handleSendMsg = () => { // 发送消息
   if (formState.value.content == '') {
-    return 
+    return
   }
   if (props.clickChat == undefined) {
     message.error('请选择聊天对象!')
-    return 
+    return
   }
   let userInfo = Session.get("userInfo")
   if (userInfo == undefined) {

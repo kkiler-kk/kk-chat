@@ -1,17 +1,22 @@
 ## KK-Chat
 
-#### 使用技术
-> 后端
-> -  mysql 做为数据存储
-> - Redis 存储消息数据 和最近聊天列表
-> - mongoDB 存储消息
-> - gin web框架
-> - websocket 保持长连接网页通讯
-> 
-> 前端
-> - Vue 
-> - ant-design
-> - TS
+## 平台介绍
+- 基于Gin Redis MongoDB MySQL  Vue TypeScript Ant-Design开发IM应用
+- 有一些基本功能点 私聊 群聊 等基础功能点
+
+### 使用技术
+#### 后端
+ -  mysql 做为数据存储
+ - Redis 存储消息数据 和最近聊天列表
+ - mongoDB 存储消息
+ - gin web框架
+ - websocket 保持长连接网页通讯
+ 
+#### 前端
+ - Vue 
+ - ant-design
+ - TS
+
 
 #### 文件
 - config 配置文件 ./mainifest/config/app.toml

@@ -149,6 +149,10 @@ const handleOk = (e: MouseEvent) => {
     })
     .catch((err) => {
       console.log("error", err);
+      if (err == undefined) {
+        message.success("修改成功") // 修改头像了
+        return
+      }
       message.error("修改失败", err);
     });
   open.value = false;
