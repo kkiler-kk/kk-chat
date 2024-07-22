@@ -4,12 +4,17 @@
       <a-input v-model:value="formState.content" :bordered="false" placeholder="请输入消息..."
         @keyup.enter="handleSendMsg" />
     </div>
-    <div style="margin-right: 20px;">
+    <div class="button-div">
       <a-button type="primary" shape="circle">
         <template #icon><meh-outlined /></template>
       </a-button>
     </div>
-    <div style="margin-right: 20px;">
+    <div  class="button-div">
+      <a-button type="primary" shape="circle">
+        <template #icon><AudioOutlined /></template>
+      </a-button>
+    </div>
+    <div  class="button-div">
       <a-button type="primary" @click="handleSendMsg">
         发送
         <template #icon><arrow-right-outlined /></template>
@@ -20,7 +25,7 @@
 </template>
 <script lang="ts" setup>
 import { ref } from "vue";
-import { MehOutlined, ArrowRightOutlined } from "@ant-design/icons-vue";
+import { MehOutlined, ArrowRightOutlined,AudioOutlined } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
 import { sendMsg, getSocket } from "@/utils/websocket";
 import { Session } from "@/utils/storage";
@@ -81,4 +86,8 @@ const handleSendMsg = () => { // 发送消息
 }
 
 </script>
-<style scoped></style>
+<style scoped>
+.button-div{
+  margin-right: 10px;
+}
+</style>
