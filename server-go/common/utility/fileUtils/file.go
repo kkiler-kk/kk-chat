@@ -14,9 +14,21 @@ func FileExists(filename string) bool {
 	return !info.IsDir()
 }
 
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
 // PutContentFile 写入文件
 // 文件不存在时自动创建,文件存在则追加内容
 func PutContentFile(path string, content string) {
+
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
 		log.Fatal(err)

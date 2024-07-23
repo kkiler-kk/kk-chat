@@ -3,9 +3,9 @@ package emailUtil
 import (
 	"fmt"
 	"gopkg.in/gomail.v2"
+	"server-go/common/utility/utils"
 	"server-go/internal/app/core/config"
 	"server-go/internal/app/core/email"
-	"server-go/internal/common/utility/utils"
 )
 
 // SendEmailCode @Title 发送邮箱验证码

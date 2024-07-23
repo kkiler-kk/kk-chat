@@ -11,12 +11,14 @@ import (
 
 func InitRouter() {
 	r := gin.Default()
-	r.Static("/resource/public/file/", "./resource/public/file/")
+	r.Static(config.Instance().Server.StaticPath, "./"+config.Instance().Server.StaticPath)
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(middleware.Cors())
 	group := r.Group("api")
 	router.InitAppRouter(group)
+	// 初始化websocket路由
+	WebSocket(group)
 	err := r.Run(fmt.Sprintf(":%d", config.Instance().Server.Port))
 	if err != nil {
 		log.Error().Msgf("端口号: %d 启动失败 err: %v", config.Instance().Server.Port, err)

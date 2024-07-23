@@ -25,6 +25,7 @@ type Server struct {
 	ClientMaxBodySize string `toml:"clientMaxBodySize"`
 	LogPath           string `toml:"logPath"`
 	LogStdout         bool   `toml:"logStdout"`
+	StaticPath        string `toml:"staticPath"`
 	ErrorStack        bool   `toml:"errorStack"`
 	ErrorLogEnabled   bool   `toml:"errorLogEnabled"`
 	ErrorLogPattern   string `toml:"errorLogPattern"`

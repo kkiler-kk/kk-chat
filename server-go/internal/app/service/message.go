@@ -6,27 +6,28 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
+	"server-go/common/utility/mongoUtils"
+	"server-go/common/utility/redisUtil"
 	"server-go/internal/app/core/config"
 	"server-go/internal/app/models"
 	"server-go/internal/app/models/request"
 	"server-go/internal/app/models/response"
-	"server-go/internal/common/utility/mongoUtils"
-	"server-go/internal/common/utility/redisUtil"
 	"server-go/internal/consts"
+	"server-go/internal/websocket"
 	"sort"
 	"strconv"
 	"time"
 )
 
 var MessageService = &messageService{}
-var RoutersFun map[string]models.EventHandler
+var RoutersFun map[string]websocket.EventHandler
 
 type messageService struct {
-	WebsocketFunMap map[string]models.EventHandler
+	WebsocketFunMap map[string]websocket.EventHandler
 }
 
 func init() { // 初始化 websocket 路由
-	RoutersFun = make(map[string]models.EventHandler)
+	RoutersFun = make(map[string]websocket.EventHandler)
 	RoutersFun["recentChatList"] = MessageService.RecentChatList // 返回最近聊天消息列表
 	RoutersFun["sendMessage"] = MessageService.SendMessage       // 接收到客户端发送过来的消息
 	RoutersFun["ping"] = MessageService.Ping                     // 心跳
@@ -39,17 +40,17 @@ func init() { // 初始化 websocket 路由
 // TODO 前端接受到消息 点击的聊天选择会乱 这是个问题
 
 // RecentChatList @Title 返回最近的聊天列表
-func (m *messageService) RecentChatList(c *gin.Context, client *models.Client, req *models.WRequest) {
+func (m *messageService) RecentChatList(c *gin.Context, client *websocket.Client, req *websocket.WRequest) {
 	str, _ := redisUtil.HGet(c, consts.RecentChat, client.ID).Result()
 	var redisChatList []*response.RecentChatListRes
 	_ = json.Unmarshal([]byte(str), &redisChatList)
 	for _, chat := range redisChatList { // 查看是否在线
-		_, chat.IsLogout = models.GetClientManager().IdInClient(models.GetUserKey(chat.ID)) // 查看用户是否在线
+		_, chat.IsLogout = websocket.GetClientManager().IdInClient(websocket.GetUserKey(chat.ID)) // 查看用户是否在线
 	}
 	sort.SliceStable(redisChatList, func(i, j int) bool {
 		return redisChatList[i].CreatedAt.Unix() > redisChatList[j].CreatedAt.Unix()
 	})
-	client.SendMsg(&models.WResponse{ // 发送消息给客户端
+	client.SendMsg(&websocket.WResponse{ // 发送消息给客户端
 		Event:     "recentChatList",
 		Data:      redisChatList,
 		Code:      200,
@@ -59,24 +60,24 @@ func (m *messageService) RecentChatList(c *gin.Context, client *models.Client, r
 }
 
 // SendMessage @Title 发送消息
-func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req *models.WRequest) {
+func (m *messageService) SendMessage(c *gin.Context, client *websocket.Client, req *websocket.WRequest) {
 	var message *request.SendMessageInputReq
 	if err := mapstructure.Decode(req.Data, &message); err != nil {
 		log.Error().Str("user_id", req.Data["userId"].(string)).Msg("发送消息失败")
 		return
 	}
-	redisCountKey := fmt.Sprintf("%stype:%d--%s->%s", consts.MsgCount, message.Type, models.GetUserKey(message.UserId), models.GetUserKey(message.TargetId)) // 比如 1->2 获取1给2发消息的总数
+	redisCountKey := fmt.Sprintf("%stype:%d--%s->%s", consts.MsgCount, message.Type, websocket.GetUserKey(message.UserId), websocket.GetUserKey(message.TargetId)) // 比如 1->2 获取1给2发消息的总数
 	countStr, _ := redisUtil.Get(c, redisCountKey)
-	var wResponse = &models.WResponse{ // 封装消息返回给发送消息的客户端
+	var wResponse = &websocket.WResponse{ // 封装消息返回给发送消息的客户端
 		Event: "error",
 		Code:  500,
 	}
 	message.CreateTime = time.Now()
-	m.RecentChatList(c, client, nil) // 刷新一下自己聊天记录
+	go m.RecentChatList(c, client, nil) // 刷新一下自己聊天记录
 	id := ""
 	if message.Type == 1 { // 1 为私聊
 		// 私聊情况key为这样 type:? 类型1 -> 2 发消息
-		id = fmt.Sprintf("type:%d--%s->%s", message.Type, models.GetUserKey(message.UserId), models.GetUserKey(message.TargetId))
+		id = fmt.Sprintf("type:%d--%s->%s", message.Type, websocket.GetUserKey(message.UserId), websocket.GetUserKey(message.TargetId))
 		// 检擦是不是好友关系
 		if !UserFriendService.IsFriend(message.UserId, message.TargetId) {
 			count, _ := strconv.ParseInt(countStr, 10, 64) // 转化为 int64
@@ -86,7 +87,7 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 				return
 			}
 		}
-		targetClient, ok := models.GetClientManager().IdInClient(models.GetUserKey(message.TargetId)) // 检查对方客户端是否在线
+		targetClient, ok := websocket.GetClientManager().IdInClient(websocket.GetUserKey(message.TargetId)) // 检查对方客户端是否在线
 		if ok {
 			// 说明客户端在线
 			targetClient.SendMsg(wResponse) // 直接发送消息给客户端
@@ -96,7 +97,7 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 		client.SendMsg(wResponse) // 给客户端发送
 	} else if message.Type == 2 && GroupService.IsGroupExist(message.TargetId, message.UserId) { // 群聊关系 并且 是群里成员
 		// 群聊id  key 为type:&d--%s 其中%s为群聊id
-		id = fmt.Sprintf("type:%d->%s", message.Type, models.GetUserKey(message.TargetId))
+		id = fmt.Sprintf("type:%d->%s", message.Type, websocket.GetUserKey(message.TargetId))
 	}
 	wResponse.Event = "sendMessage"
 	wResponse.Code = 200
@@ -111,7 +112,7 @@ func (m *messageService) SendMessage(c *gin.Context, client *models.Client, req 
 }
 
 // MessageList @Title 返回消息列表
-func (m *messageService) MessageList(c *gin.Context, client *models.Client, req *models.WRequest) {
+func (m *messageService) MessageList(c *gin.Context, client *websocket.Client, req *websocket.WRequest) {
 	var searchMessageInput *request.ListMessageInput
 	if err := mapstructure.Decode(req.Data, &searchMessageInput); err != nil {
 		log.Error().Str("user_id", req.Data["userId"].(string)).Msg("发送消息失败")
@@ -119,16 +120,16 @@ func (m *messageService) MessageList(c *gin.Context, client *models.Client, req 
 	}
 
 	// 获取两个消息
-	mongoChatKey := fmt.Sprintf("type:%d--%s->%s", searchMessageInput.Type, models.GetUserKey(searchMessageInput.UserId), models.GetUserKey(searchMessageInput.TargetId))
+	mongoChatKey := fmt.Sprintf("type:%d--%s->%s", searchMessageInput.Type, websocket.GetUserKey(searchMessageInput.UserId), websocket.GetUserKey(searchMessageInput.TargetId))
 	var userMessageList []models.Trainer           // 自己发送的消息
 	var targetUserMessageList []models.Trainer     // 对方发送的消息
 	var messageList []*request.SendMessageInputReq // 消息合并 and 返回消息结构体
 	if searchMessageInput.Type == 2 {              // 2 说明群聊
 		// type: %d 2 群聊 第二个参数是群聊的id 这样就可以直接获取到参数 也就是 群聊key 是这样的 type:2--1 私聊key是这样的 type:1--1-->2
-		mongoChatKey = fmt.Sprintf("type:%d->%s", searchMessageInput.Type, models.GetUserKey(searchMessageInput.TargetId))
+		mongoChatKey = fmt.Sprintf("type:%d->%s", searchMessageInput.Type, websocket.GetUserKey(searchMessageInput.TargetId))
 	} else { // 私聊需要获取对方的消息
 		if searchMessageInput.UserId != searchMessageInput.TargetId {
-			targetUserMessageList, _ = mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, fmt.Sprintf("type:%d--%s->%s", searchMessageInput.Type, models.GetUserKey(searchMessageInput.TargetId), models.GetUserKey(searchMessageInput.UserId)))
+			targetUserMessageList, _ = mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, fmt.Sprintf("type:%d--%s->%s", searchMessageInput.Type, websocket.GetUserKey(searchMessageInput.TargetId), websocket.GetUserKey(searchMessageInput.UserId)))
 		}
 	}
 	userMessageList, _ = mongoUtils.ListMessAge(c, config.Instance().Mongo.Database, mongoChatKey)
@@ -143,7 +144,7 @@ func (m *messageService) MessageList(c *gin.Context, client *models.Client, req 
 	sort.SliceStable(messageList, func(i, j int) bool {
 		return messageList[i].CreateTime.Unix() < messageList[j].CreateTime.Unix()
 	})
-	client.SendMsg(&models.WResponse{ // 发送消息给客户端
+	client.SendMsg(&websocket.WResponse{ // 发送消息给客户端
 		Event:     "messageList",
 		Data:      messageList,
 		Code:      200,
@@ -173,7 +174,7 @@ func (m *messageService) settingRecentChat(c *gin.Context, message *request.Send
 // setRecentChat @Title 设置最近聊天列表 因为有I and target 目标发送人 代码重复 再封装一成 重复利用
 func (m *messageService) setRecentChat(c *gin.Context, id int64, userRecentModel *response.RecentChatListRes) (err error) {
 	var userRecentList []interface{} // TODO *response.RecentChatListRes 这是原本类型 等我有时间再优化一下把
-	str, _ := redisUtil.HGet(c, consts.RecentChat, models.GetUserKey(id)).Result()
+	str, _ := redisUtil.HGet(c, consts.RecentChat, websocket.GetUserKey(id)).Result()
 	if str != "" { // 说明有最近聊天的人 检查一下 是否存在接收者 信息 更新一下最新消息 怎么理解呢
 		err = json.Unmarshal([]byte(str), &userRecentList)
 		if err != nil {
@@ -198,11 +199,11 @@ func (m *messageService) setRecentChat(c *gin.Context, id int64, userRecentModel
 	} else { // 说明是聊天第一人咯 直接append
 		userRecentList = append(userRecentList, userRecentModel)
 	}
-	err = redisUtil.HSet(c, consts.RecentChat, models.GetUserKey(id), userRecentList...) // 重置一下最近的聊天列表
+	err = redisUtil.HSet(c, consts.RecentChat, websocket.GetUserKey(id), userRecentList...) // 重置一下最近的聊天列表
 	return
 }
 
-func (m *messageService) Ping(c *gin.Context, client *models.Client, req *models.WRequest) {
+func (m *messageService) Ping(c *gin.Context, client *websocket.Client, req *websocket.WRequest) {
 	UserBasicService.UpdateHeartTime(client.User.ID) // 更新一下心跳时间
-	models.SendSuccess(client, req.Event)
+	websocket.SendSuccess(client, req.Event)
 }

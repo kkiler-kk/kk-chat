@@ -1,35 +1,20 @@
-package models
+package websocket
 
 import (
 	"fmt"
 	"github.com/robfig/cron/v3"
 	"github.com/rs/zerolog/log"
 	"runtime/debug"
-	"server-go/internal/common/utility"
+	"server-go/common/utility"
 	"sync"
 	"time"
 )
-
-var clientManager = NewClientManager()
 
 func GetClientManager() *ClientManager {
 	if clientManager == nil {
 		clientManager = NewClientManager()
 	}
 	return clientManager
-}
-
-type ClientWResponse struct {
-	ID        string
-	WResponse *WResponse
-}
-type TagWResponse struct {
-	Tag       string
-	WResponse *WResponse
-}
-type UserWResponse struct {
-	UserID    int64
-	WResponse *WResponse
 }
 
 // ClientManager 客户端管理
@@ -259,13 +244,6 @@ func (manager *ClientManager) ping() {
 	//gcron.Add(ctxManager, "*/30 * * * * *", func(ctx context.Context) {
 	//	manager.clearTimeoutConnections()
 	//})
-}
-
-// Start 启动
-func Start() {
-	go clientManager.start()
-	go clientManager.ping()
-	log.Debug().Msg("start websocket..")
 }
 
 // 管道处理程序

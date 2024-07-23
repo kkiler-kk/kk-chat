@@ -3,9 +3,9 @@ package contexts
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"server-go/common/utility/redisUtil"
 	"server-go/internal/app/core/config"
 	"server-go/internal/app/models"
-	"server-go/internal/common/utility/redisUtil"
 )
 
 func GetUser(c *gin.Context) *models.UserBasic {

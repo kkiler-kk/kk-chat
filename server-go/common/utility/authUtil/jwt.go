@@ -3,8 +3,8 @@ package authUtil
 import (
 	"errors"
 	"github.com/golang-jwt/jwt/v5"
+	"server-go/common/utility/utils"
 	"server-go/internal/app/core/config"
-	"server-go/internal/common/utility/utils"
 	"time"
 )
 

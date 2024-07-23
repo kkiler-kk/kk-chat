@@ -3,12 +3,12 @@ package control
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
+	"server-go/common/utility"
+	"server-go/common/utility/catchaGenerUtil"
+	"server-go/common/utility/validate"
 	"server-go/internal/app/models/request"
 	"server-go/internal/app/models/response"
 	"server-go/internal/app/service"
-	"server-go/internal/common/utility"
-	"server-go/internal/common/utility/catchaGenerUtil"
-	"server-go/internal/common/utility/validate"
 	"strconv"
 )
 

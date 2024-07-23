@@ -1,4 +1,4 @@
-package models
+package websocket
 
 import (
 	"fmt"
@@ -6,7 +6,8 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
 	"runtime/debug"
-	"server-go/internal/common/utility/location"
+	"server-go/common/utility/location"
+	"server-go/internal/app/models"
 	"time"
 )
 
@@ -21,30 +22,21 @@ type login struct {
 	Client *Client
 }
 
-// WResponse 输出对象
-type WResponse struct {
-	Event     string      `json:"event"`              // 事件名称
-	Data      interface{} `json:"data,omitempty"`     // 数据
-	Code      int         `json:"code"`               // 状态码
-	ErrorMsg  string      `json:"errorMsg,omitempty"` // 错误消息
-	Timestamp int64       `json:"timestamp"`          // 服务器时间
-}
-
 // Client 客户端连接
 type Client struct {
-	Addr          string          // 客户端地址
-	ID            string          // 连接唯一标识
-	Socket        *websocket.Conn // 用户连接
-	Send          chan *WResponse // 待发送的数据
-	SendClose     bool            // 发送是否关闭
-	CloseSignal   chan struct{}   // 关闭信号
-	FirstTime     uint64          // 首次连接时间
-	HeartbeatTime uint64          // 用户上次心跳时间
-	Tags          []int64         // 标签  群聊id若有次id 就推送消息
-	User          *UserBasic      // 用户信息
-	context       *gin.Context    // Custom context for internal usage purpose.
-	IP            string          // 客户端IP
-	UserAgent     string          // 用户代理
+	Addr          string            // 客户端地址
+	ID            string            // 连接唯一标识
+	Socket        *websocket.Conn   // 用户连接
+	Send          chan *WResponse   // 待发送的数据
+	SendClose     bool              // 发送是否关闭
+	CloseSignal   chan struct{}     // 关闭信号
+	FirstTime     uint64            // 首次连接时间
+	HeartbeatTime uint64            // 用户上次心跳时间
+	Tags          []int64           // 标签  群聊id若有次id 就推送消息
+	User          *models.UserBasic // 用户信息
+	context       *gin.Context      // Custom context for internal usage purpose.
+	IP            string            // 客户端IP
+	UserAgent     string            // 用户代理
 }
 
 // NewClient 初始化
@@ -137,11 +129,58 @@ func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
 	return
 }
 
-// WRequest 输入对象
-type WRequest struct {
-	Event string                 `json:"event"` // 事件名称
-	Data  map[string]interface{} `json:"data"`  // 数据
+// 关闭客户端
+func (c *Client) close() {
+	if c.SendClose {
+		return
+	}
+	c.SendClose = true
+	c.CloseSignal <- struct{}{}
 }
 
-// EventHandler 消息处理器
-type EventHandler func(c *gin.Context, client *Client, req *WRequest)
+// 读取客户端数据
+func (c *Client) read(ctx *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Error().Msg(fmt.Sprintf("client read err: %+v, stack:%+v, user:%+v", r, string(debug.Stack()), c.User))
+		}
+	}()
+
+	defer c.close()
+
+	for {
+		_, message, err := c.Socket.ReadMessage()
+		if err != nil {
+			return
+		}
+		// 处理消息
+		handlerMsg(ctx, c, message)
+	}
+}
+
+// 向客户端写数据
+func (c *Client) write(ctx *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Warn().Msg(fmt.Sprintf("client write err: %+v, stack:%+v, user:%+v", r, string(debug.Stack()), c.User))
+		}
+	}()
+	defer func() {
+		clientManager.Unregister <- c
+		_ = c.Socket.Close()
+	}()
+	for {
+		select {
+		case <-c.CloseSignal:
+			log.Info().Msg(fmt.Sprintf("websocket client quit, user:%+v", c.User))
+			return
+		case message, ok := <-c.Send:
+			if !ok {
+				// 发送数据错误 关闭连接
+				log.Warn().Msg(fmt.Sprintf("client write message, user:%+v", c.User))
+				return
+			}
+			_ = c.Socket.WriteJSON(message)
+		}
+	}
+}

@@ -2,8 +2,8 @@ package service
 
 import (
 	"github.com/gin-gonic/gin"
-	"server-go/internal/common/utility/emailUtil"
-	"server-go/internal/common/utility/redisUtil"
+	"server-go/common/utility/emailUtil"
+	"server-go/common/utility/redisUtil"
 	"server-go/internal/consts"
 	"time"
 )

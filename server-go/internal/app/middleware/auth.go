@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"server-go/internal/common/utility/authUtil"
+	"server-go/common/utility/authUtil"
 	"strings"
 )
 

@@ -2,9 +2,9 @@ package control
 
 import (
 	"github.com/gin-gonic/gin"
+	"server-go/common/utility"
 	"server-go/internal/app/core/config"
 	"server-go/internal/app/models/response"
-	"server-go/internal/common/utility"
 )
 
 var FileControl *fileControl

@@ -4,11 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"server-go/internal/app/control"
 	"server-go/internal/app/middleware"
-	"server-go/internal/app/models"
+	"server-go/internal/websocket"
 )
 
 func MessageRouter(r *gin.RouterGroup) {
 	message := r.Group("message")                                                          //, middleware.AuthMiddlewareUpdate
-	models.Start()                                                                         // 开启websocket manage
+	websocket.Start()                                                                      // 开启websocket manage
 	message.GET("socket", middleware.AuthMiddlewareUpdate, control.MessageControl.Handler) // 用户建立websocket 连接登录
 }

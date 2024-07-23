@@ -8,12 +8,13 @@ import (
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"runtime/debug"
+	"server-go/common/utility/redisUtil"
 	"server-go/internal/app/core/config"
 	"server-go/internal/app/models"
 	"server-go/internal/app/models/response"
 	"server-go/internal/app/service"
 	_ "server-go/internal/app/service"
-	"server-go/internal/common/utility/redisUtil"
+	websocket2 "server-go/internal/websocket"
 	"time"
 )
 
@@ -43,17 +44,17 @@ func (u *messageControl) Handler(c *gin.Context) {
 		return
 	}
 	currentTime := uint64(time.Now().Unix())
-	client := models.NewClient(c, ws, currentTime)
-	client.ID = models.GetUserKey(user.ID) // 设置id
+	client := websocket2.NewClient(c, ws, currentTime)
+	client.ID = websocket2.GetUserKey(user.ID) // 设置id
 	client.User = user
-	models.GetClientManager().Register <- client
-	service.UserBasicService.UpdateLoginTime(client.User.ID) // 更新 用户登录了数据库
+	websocket2.GetClientManager().Register <- client
+	go service.UserBasicService.UpdateLoginTime(client.User.ID) // 更新 用户登录了数据库
 	go u.read(c, client)
 	go u.write(c, client)
 }
 
 // read @Title 读取客户端数据
-func (u *messageControl) read(c *gin.Context, client *models.Client) {
+func (u *messageControl) read(c *gin.Context, client *websocket2.Client) {
 	// 读取客户端数据
 	defer func() {
 		if r := recover(); r != nil {
@@ -62,7 +63,7 @@ func (u *messageControl) read(c *gin.Context, client *models.Client) {
 	}()
 
 	defer func() {
-		models.GetClientManager().Unregister <- client
+		websocket2.GetClientManager().Unregister <- client
 		client.Close()
 	}()
 
@@ -78,7 +79,7 @@ func (u *messageControl) read(c *gin.Context, client *models.Client) {
 }
 
 // write @Title @ 写入数据向客户端
-func (u *messageControl) write(c *gin.Context, client *models.Client) {
+func (u *messageControl) write(c *gin.Context, client *websocket2.Client) {
 	// 向客户端写数据
 	defer func() {
 		if r := recover(); r != nil {
@@ -86,7 +87,7 @@ func (u *messageControl) write(c *gin.Context, client *models.Client) {
 		}
 	}()
 	defer func() {
-		models.GetClientManager().Unregister <- client
+		websocket2.GetClientManager().Unregister <- client
 		client.Socket.Close()
 	}()
 	for {
@@ -107,14 +108,14 @@ func (u *messageControl) write(c *gin.Context, client *models.Client) {
 }
 
 // handlerMsg 处理消息
-func handlerMsg(c *gin.Context, client *models.Client, message []byte) {
+func handlerMsg(c *gin.Context, client *websocket2.Client, message []byte) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Error().Msg(fmt.Sprintf("handlerMsg recover, err:%+v, stack:%+v", r, string(debug.Stack())))
 		}
 	}()
 
-	var request *models.WRequest
+	var request *websocket2.WRequest
 	if err := json.Unmarshal(message, &request); err != nil {
 		log.Error().Msg(fmt.Sprintf("handlerMsg 数据解析失败,err:%+v, message:%+v", err, string(message)))
 		return

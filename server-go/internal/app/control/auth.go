@@ -2,11 +2,11 @@ package control
 
 import (
 	"github.com/gin-gonic/gin"
+	"server-go/common/utility/catchaGenerUtil"
+	"server-go/common/utility/validate"
 	"server-go/internal/app/models/request"
 	"server-go/internal/app/models/response"
 	"server-go/internal/app/service"
-	"server-go/internal/common/utility/catchaGenerUtil"
-	"server-go/internal/common/utility/validate"
 )
 
 var AuthControl *authControl
