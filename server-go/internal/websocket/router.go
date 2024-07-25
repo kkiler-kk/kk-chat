@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog/log"
 	"runtime/debug"
-	"server-go/internal/app/service"
 )
 
 // handlerMsg 处理消息
@@ -27,7 +26,7 @@ func handlerMsg(c *gin.Context, client *Client, message []byte) {
 		log.Error().Msg("handlerMsg request.Event is null")
 		return
 	}
-	fun, ok := service.RoutersFun[request.Event]
+	fun, ok := routers[request.Event]
 	if !ok {
 		log.Error().Msg(fmt.Sprintf("handlerMsg function id %v: not registered", request.Event))
 		return

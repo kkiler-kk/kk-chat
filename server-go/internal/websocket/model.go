@@ -1,6 +1,8 @@
 package websocket
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 // WRequest 输入对象
 type WRequest struct {

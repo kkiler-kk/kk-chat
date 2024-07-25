@@ -8,6 +8,7 @@ import (
 	"runtime/debug"
 	"server-go/common/utility/location"
 	"server-go/internal/app/models"
+	"server-go/internal/consts"
 	"time"
 )
 
@@ -40,8 +41,9 @@ type Client struct {
 }
 
 // NewClient 初始化
-func NewClient(c *gin.Context, socket *websocket.Conn, firstTime uint64) (client *Client) {
+func NewClient(c *gin.Context, socket *websocket.Conn, firstTime uint64, user *models.UserBasic) (client *Client) {
 	client = &Client{
+		ID:            GetUserKey(user.ID),
 		Addr:          socket.RemoteAddr().String(),
 		Socket:        socket,
 		Send:          make(chan *WResponse, 100),
@@ -49,9 +51,9 @@ func NewClient(c *gin.Context, socket *websocket.Conn, firstTime uint64) (client
 		CloseSignal:   make(chan struct{}, 1),
 		FirstTime:     firstTime,
 		HeartbeatTime: firstTime,
-		//User:          contexts.GetUser(c),
-		IP: location.GetClientIp(c),
-		//UserAgent: r.UserAgent(),
+		User:          user,
+		IP:            location.GetClientIp(c),
+		//UserAgent:     c.UserAgent(),
 	}
 	return
 }
@@ -123,7 +125,7 @@ func before(client *Client) {
 
 // IsHeartbeatTimeout 心跳是否超时
 func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
-	if c.HeartbeatTime+heartbeatExpirationTime <= currentTime {
+	if c.HeartbeatTime+consts.HeartbeatExpirationTime <= currentTime {
 		timeout = true
 	}
 	return

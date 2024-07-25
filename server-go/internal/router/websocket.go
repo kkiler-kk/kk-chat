@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/gin-gonic/gin"
 	"server-go/internal/app/middleware"
+	"server-go/internal/app/service"
 	"server-go/internal/consts"
 	"server-go/internal/websocket"
 )
@@ -10,13 +11,16 @@ import (
 // WebSocket ws路由配置
 func WebSocket(group *gin.RouterGroup) {
 	// 需要鉴权
-	group.Group(consts.AppWebSocket, func(c *gin.Context) {
-		middleware.AuthMiddlewareUpdate(c)
-		// ws
-		group.GET("/", websocket.WsPage)
-	})
+	wsGroup := group.Group(consts.AppWebSocket)
+	// ws
+	wsGroup.GET("", middleware.AuthMiddlewareUpdate, websocket.WsPage)
 	// 启动websocket鉴听
 	websocket.Start()
 	// 注册ws消息路由
-	websocket.RegisterMsg(websocket.EventHandlers{})
+	websocket.RegisterMsg(websocket.EventHandlers{
+		"recentChatList": service.MessageService.RecentChatList, // 返回最近聊天消息列表
+		"sendMessage":    service.MessageService.SendMessage,    // 接收到客户端发送过来的消息
+		"ping":           service.MessageService.Ping,           // 心跳
+		"messageList":    service.MessageService.MessageList,    // 返回消息列表
+	})
 }

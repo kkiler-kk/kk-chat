@@ -1,10 +1,15 @@
 package websocket
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog/log"
 	"net/http"
+	"server-go/common/utility/redisUtil"
+	"server-go/internal/app/core/config"
+	"server-go/internal/app/models"
+	"server-go/internal/app/models/response"
 	"time"
 )
 
@@ -27,6 +32,14 @@ func Stop() {
 
 // WsPage ws入口
 func WsPage(c *gin.Context) {
+	token, _ := c.Get("token")
+	var user *models.UserBasic
+	jsonStr, _ := redisUtil.Get(c, config.Instance().Token.CacheKey+token.(string))
+	if jsonStr == "" {
+		response.ErrorResp(c).SetMsg("用户状态已过期，请重新登陆")
+		return
+	}
+	_ = json.Unmarshal([]byte(jsonStr), &user)
 	upGrader := websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -36,10 +49,12 @@ func WsPage(c *gin.Context) {
 	}
 	conn, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
+
 		return
 	}
 	currentTime := uint64(time.Now().Unix())
-	client := NewClient(c, conn, currentTime)
+	client := NewClient(c, conn, currentTime, user)
+	clientManager.Register <- client // 新用户上线
 	go client.read(c)
 	go client.write(c)
 	// 用户连接事件

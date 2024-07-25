@@ -12,7 +12,6 @@ func GetUser(c *gin.Context) *models.UserBasic {
 	var (
 		result = &models.UserBasic{}
 	)
-
 	token, exists := c.Get("token")
 	if exists {
 		return result

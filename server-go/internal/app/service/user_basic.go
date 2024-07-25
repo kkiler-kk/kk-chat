@@ -69,9 +69,7 @@ func (u *userBasicService) Login(c *gin.Context, input request.UserBasicLoginReq
 	}
 
 	// 更新用户登录时间
-	user.LoginTime = time.Now()
-	user.IsLogout = 2              //修改成 2 表示用户在线
-	_ = dao.UserBasic.Update(user) // 更新用户登录时间 修改成 2 表示用户在线
+	go u.UpdateLoginTime(user.ID)
 
 	token, err := authUtil.GenToken(user.ID)
 	jsonStr, _ := json.Marshal(user)

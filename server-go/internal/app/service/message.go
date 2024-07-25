@@ -20,18 +20,11 @@ import (
 )
 
 var MessageService = &messageService{}
-var RoutersFun map[string]websocket.EventHandler
 
 type messageService struct {
-	WebsocketFunMap map[string]websocket.EventHandler
 }
 
 func init() { // 初始化 websocket 路由
-	RoutersFun = make(map[string]websocket.EventHandler)
-	RoutersFun["recentChatList"] = MessageService.RecentChatList // 返回最近聊天消息列表
-	RoutersFun["sendMessage"] = MessageService.SendMessage       // 接收到客户端发送过来的消息
-	RoutersFun["ping"] = MessageService.Ping                     // 心跳
-	RoutersFun["messageList"] = MessageService.MessageList       // 返回消息列表
 }
 
 // TODO 优化代码
