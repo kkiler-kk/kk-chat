@@ -16,6 +16,8 @@ declare module 'vue' {
     ACardMeta: typeof import('ant-design-vue/es')['CardMeta']
     ACheckbox: typeof import('ant-design-vue/es')['Checkbox']
     ACol: typeof import('ant-design-vue/es')['Col']
+    ACollapse: typeof import('ant-design-vue/es')['Collapse']
+    ACollapsePanel: typeof import('ant-design-vue/es')['CollapsePanel']
     ADivider: typeof import('ant-design-vue/es')['Divider']
     ADrawer: typeof import('ant-design-vue/es')['Drawer']
     AEmpty: typeof import('ant-design-vue/es')['Empty']

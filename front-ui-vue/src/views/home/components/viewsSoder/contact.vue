@@ -11,68 +11,67 @@
       </a-popover>
     </div>
     <div>
-      <a-input-search
-        size="large"
-        class="search"
-        v-model:value="value"
-        placeholder="搜索..."
-        enter-button
-        @search="onSearch"
-      />
+      <a-input-search size="large" class="search" v-model:value="value" placeholder="搜索..." enter-button
+        @search="onSearch" />
     </div>
     <div class="content">
-      <div>
-        <div style="float: left">
-          <h6>*</h6>
+      <div class="manage">
+        <div>
+          <span>好友通知</span>
+          <span>></span>
         </div>
-        <div
-          v-for="(item, i) in groupList"
-          class="card"
-          :class="{ click: index == item.id }"
-          @click="handleSelectChat(item, item.id, 2)"
-        >
-          <div class="media">
-            <div class="media-avatar">
-                <a-avatar shape="square" class="avatar" size="large" :src="item.avatar" />
-            </div>
-            <div style="margin-top: 10px">
-              <div clas="d-flex align-items-center mb-1">
-                <h6 class="text-truncate mb-0 me-auto">{{ item.name }}({{ item.identity }})</h6>
-                <!-- <p class="small text-muted text-nowrap ms-4 mb-0">11:08 am</p> -->
-              </div>
-              <div class="text-truncate">{{ item.countMember }} 成员</div>
-            </div>
-          </div>
+        <div>
+          <span>群通知</span>
+          <span>></span>
         </div>
       </div>
-      <div v-for="(item, o) in data" :key="index">
-        <div style="float: left">
-          <h6>{{ item.type }}</h6>
-        </div>
-        <div
-          v-for="(l, i) in item.list"
-          :key="l.id"
-          class="card"
-          :class="{ click: index == l.id }"
-          @click="handleSelectChat(l, l.id, 1)"
-        >
-          <div class="media">
-            <div class="media-avatar">
-              <a-badge dot :color="l.isLogout ? 'green' : 'rgb(204, 204, 204)'">
-                <a-avatar shape="square" class="avatar" size="large" :src="l.avatar" />
-              </a-badge>
-            </div>
-            <div style="margin-top: 10px">
-              <div clas="d-flex align-items-center mb-1">
-                <h6 class="text-truncate mb-0 me-auto">{{ l.name }}</h6>
-                <!-- <p class="small text-muted text-nowrap ms-4 mb-0">11:08 am</p> -->
-              </div>
-              <div class="text-truncate">
-                {{ l.isLogout ? "" : formatPast(l.loginOutTime) }} 在线
+      <a-divider style="height: 0.5px; background-color: rgb(23, 133, 255); padding: 0; margin-top: 0px; margin-bottom: 12px;" />
+      <div>
+        <a-collapse v-model:activeKey="activeKey" :bordered="false">
+          <a-collapse-panel key="1" header="群聊">
+            <div v-for="(item, i) in groupList" class="card" :class="{ click: index == item.id }"
+              @click="handleSelectChat(item, item.id, 2)">
+              <div class="media">
+                <div class="media-avatar">
+                  <a-avatar shape="square" class="avatar" size="large" :src="item.avatar" />
+                </div>
+                <div style="margin-top: 10px">
+                  <div clas="d-flex align-items-center mb-1">
+                    <h6 class="text-truncate mb-0 me-auto">{{ item.name }}({{ item.identity }})</h6>
+                    <!-- <p class="small text-muted text-nowrap ms-4 mb-0">11:08 am</p> -->
+                  </div>
+                  <div class="text-truncate">{{ item.countMember }} 成员</div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </a-collapse-panel>
+          <a-collapse-panel key="2" header="我的好友">
+            <div v-for="(item, o) in data" :key="index">
+              <div style="float: left">
+                <h6>{{ item.type }}</h6>
+              </div>
+              <div v-for="(l, i) in item.list" :key="l.id" class="card" :class="{ click: index == l.id }"
+                @click="handleSelectChat(l, l.id, 1)">
+                <div class="media">
+                  <div class="media-avatar">
+                    <a-badge dot :color="l.isLogout ? 'green' : 'rgb(204, 204, 204)'">
+                      <a-avatar shape="square" class="avatar" size="large" :src="l.avatar" />
+                    </a-badge>
+                  </div>
+                  <div style="margin-top: 10px">
+                    <div clas="d-flex align-items-center mb-1">
+                      <h6 class="text-truncate mb-0 me-auto">{{ l.name }}</h6>
+                      <!-- <p class="small text-muted text-nowrap ms-4 mb-0">11:08 am</p> -->
+                    </div>
+                    <div class="text-truncate">
+                      {{ l.isLogout ? "" : formatPast(l.loginOutTime) }} 在线
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </a-collapse-panel>
+        </a-collapse>
       </div>
     </div>
     <plusFirendGroup ref="openPlusRef" />
@@ -86,6 +85,7 @@ import { listGroup } from "@/api/group/index";
 import { formatPast } from "@/utils/formatTime";
 import plusFirendGroup from "@/views/home/components/viewsSoder/components/plusFirendGroup.vue";
 
+const activeKey = ref(['1'])
 const clickChat = ref<any>();
 const visible = ref<boolean>(false);
 const value = ref<string>("");
@@ -161,12 +161,14 @@ const filterName = (list: any) => {
   width: 100%;
   height: 5%;
 }
+
 .title {
   float: left;
   padding-left: 10px;
   font-size: 26px;
   color: rgb(24, 144, 255);
 }
+
 .botton {
   float: right;
   /* margin-right: 10px; */
@@ -174,21 +176,26 @@ const filterName = (list: any) => {
   color: white;
   border-radius: 8%;
 }
+
 .search {
   background-color: white;
   border-radius: 15%;
 }
+
 .content {
   background-color: rgb(243, 242, 239);
   height: 87%;
   margin-top: 10px;
 }
+
 .content {
   overflow: auto;
 }
+
 .small {
   float: right;
 }
+
 .card {
   height: 70px;
   padding: 0;
@@ -196,22 +203,27 @@ const filterName = (list: any) => {
   margin-bottom: 3px;
   background-color: white;
 }
+
 .card:hover {
   border: 1px solid rgb(24, 144, 255);
   box-shadow: 0.5px 0.5px rgb(24, 144, 255);
   color: rgb(24, 144, 255);
 }
+
 .click {
   border: 1px solid rgb(24, 144, 255);
   box-shadow: 0.5px 0.5px rgb(24, 144, 255);
 }
+
 :deep(.ant-card-body) {
   padding: 0px;
 }
+
 .avatar {
   width: 40px;
   height: 40px;
 }
+
 .media-avatar {
   margin-right: 1rem !important;
   margin-top: 1rem !important;
@@ -220,5 +232,26 @@ const filterName = (list: any) => {
 h6 {
   font-weight: normal;
   font-size: 1rem;
+}
+
+.manage {
+  width: 100%;
+  height: 8%;
+  font-size: 15px;
+  margin: 0px;
+  padding: 0;
+}
+
+.manage div {
+  margin-top: 5px;
+  margin: 0 auto;
+  width: 90%;
+  height: 45%;
+}
+.manage > div span:nth-child(1) {
+  float: left;
+}
+.manage > div span:nth-child(2) {
+  float: right;
 }
 </style>

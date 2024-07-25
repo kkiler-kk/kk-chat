@@ -34,16 +34,16 @@
             </a-badge>
             <a-avatar v-else shape="square" class="avatar" size="large" :src="item.avatar" />
           </div>
-          <div style="margin-top: 10px">
-            <div clas="d-flex align-items-center mb-1">
-              <h6 class="text-truncate mb-0 me-auto" style="float: left">
+          <div style="margin-top: 10px; position: relative;">
+            <div clas="d-flex align-items-center mb-1" style="width: 100%;height: 100%;">
+              <h6 class="text-truncate mb-0 me-auto">
                 {{ item.name }}
               </h6>
-              <p class="small text-muted text-nowrap ms-4 mb-0" style="float: right">
+              <p class="small text-muted text-nowrap ms-4 mb-0" style="position: absolute; left: 12rem;">
                 {{ formatPast(new Date(item.createdAt), "YYYY-mm-dd HH:MM") }}
               </p>
             </div>
-            <div class="text-truncate" style="float: left">
+            <div class="text-truncate" style="margin-bottom: 0rem; position: absolute;top: 1.5rem;">
               {{ item.content }}
             </div>
           </div>
