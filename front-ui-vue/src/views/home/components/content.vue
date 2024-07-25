@@ -75,8 +75,7 @@ async function getSocketData(data) {
     if (
       props.clickChat.id == messageModel.data.targetId ||
       messageModel.data.userId == props.clickChat.id
-    ) {
-      // 如果刚好和他聊天 就添加进当前消息聊天记录
+    ) { // 如果刚好和他聊天 就添加进当前消息聊天记录
       messageList.value.push(messageModel.data);
     }
   } else if (messageModel.event == "error") {
