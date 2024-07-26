@@ -18,18 +18,23 @@
       <div class="manage">
         <div>
           <span>好友通知</span>
-          <span>></span>
+          <span>
+            <RightOutlined />
+          </span>
         </div>
         <div>
           <span>群通知</span>
-          <span>></span>
+          <span>
+            <RightOutlined />
+          </span>
         </div>
       </div>
-      <a-divider style="height: 0.5px; background-color: rgb(23, 133, 255); padding: 0; margin-top: 0px; margin-bottom: 12px;" />
+      <a-divider
+        style="height: 0.5px; background-color: rgb(23, 133, 255); padding: 0; margin-top: 0px; margin-bottom: 12px;" />
       <div>
         <a-collapse v-model:activeKey="activeKey" :bordered="false">
           <a-collapse-panel key="1" header="群聊">
-            <div v-for="(item, i) in groupList" class="card" :class="{ click: index == item.id }"
+            <div v-for="(item, i) in searhcGroupList" class="card" :class="{ click: index == item.id }"
               @click="handleSelectChat(item, item.id, 2)">
               <div class="media">
                 <div class="media-avatar">
@@ -46,7 +51,7 @@
             </div>
           </a-collapse-panel>
           <a-collapse-panel key="2" header="我的好友">
-            <div v-for="(item, o) in data" :key="index">
+            <div v-for="(item, o) in searhcFriendList" :key="index">
               <div style="float: left">
                 <h6>{{ item.type }}</h6>
               </div>
@@ -78,20 +83,22 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { listFriend } from "@/api/userFriend/userFriend";
 import pinyin from "js-pinyin";
 import { listGroup } from "@/api/group/index";
 import { formatPast } from "@/utils/formatTime";
 import plusFirendGroup from "@/views/home/components/viewsSoder/components/plusFirendGroup.vue";
-
-const activeKey = ref(['1'])
+import {
+  RightOutlined
+} from "@ant-design/icons-vue";
+const activeKey = ref(['2'])
 const clickChat = ref<any>();
 const visible = ref<boolean>(false);
-const value = ref<string>("");
+const searchValue = ref<string>("");
 const openPlusRef = ref();
 const index = ref<number>();
-const data = ref<any>();
+const dataList = ref<any>([]);
 const groupList = ref<any>();
 const emit = defineEmits(["getValue"]);
 
@@ -115,7 +122,7 @@ const handleListFriend = () => {
       scenicData.push(obj);
     }
     filterName(scenicData);
-    data.value = filterName(scenicData);
+    dataList.value = filterName(scenicData);
   });
 };
 const handleListGroup = () => {
@@ -137,7 +144,7 @@ const handleSelectChat = (item: any, i: number, type: number) => {
   emit("getValue", clickChat.value);
 };
 
-const filterName = (list: any) => {
+const filterName = (list: any) => {  // 按字母排序
   let letterArray = [];
   for (let i = 65; i < 91; i++) {
     letterArray.push(String.fromCharCode(i));
@@ -154,6 +161,20 @@ const filterName = (list: any) => {
   newNames = newNames.filter((item) => item.list.length);
   return newNames;
 };
+const searhcGroupList = computed(() => { // 过滤群聊
+  return groupList.value.filter((item) => {
+    return item.name.toLowerCase().match(searchValue.value.toLowerCase())
+  })
+})
+
+const searhcFriendList = computed(() => { // 过滤群聊
+  console.log("dataList", dataList.value)
+  return dataList.value.filter((item) => {
+    return item.list.filter((n) => {
+      return n.name.toLowerCase().match(searchValue.value.toLowerCase())
+    })
+  })
+})
 </script>
 <style scoped>
 .div1 {
@@ -236,22 +257,23 @@ h6 {
 
 .manage {
   width: 100%;
-  height: 8%;
+  height: 9%;
   font-size: 15px;
   margin: 0px;
   padding: 0;
 }
 
 .manage div {
-  margin-top: 5px;
   margin: 0 auto;
   width: 90%;
   height: 45%;
 }
-.manage > div span:nth-child(1) {
+
+.manage>div span:nth-child(1) {
   float: left;
 }
-.manage > div span:nth-child(2) {
+
+.manage>div span:nth-child(2) {
   float: right;
 }
 </style>

@@ -14,7 +14,7 @@
       <a-input-search
         size="large"
         class="search"
-        v-model:value="value"
+        v-model:value="searchValue"
         placeholder="搜索..."
         enter-button
         @search="onSearch"
@@ -22,7 +22,7 @@
     </div>
     <div class="content">
       <a-card
-        v-for="(item, i) in dataList"
+        v-for="(item, i) in searchList"
         class="card"
         :class="{click: index == i}"
         @click="handleSelectChat(item, i)"
@@ -55,7 +55,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted, inject } from "vue";
+import { ref, onMounted, computed} from "vue";
 import { UserOutlined } from "@ant-design/icons-vue";
 import { sendMsg } from "@/utils/websocket";
 import plusFirendGroup from "@/views/home/components/viewsSoder/components/plusFirendGroup.vue";
@@ -64,10 +64,10 @@ import { message } from "ant-design-vue";
 import { formatPast } from "@/utils/formatTime";
 import { isJsonString } from "@/utils/is";
 const visible = ref<boolean>(false);
-const value = ref<string>("");
+const searchValue = ref<string>("");
 const openPlusRef = ref();
 const openGroupRef = ref();
-const dataList = ref<any>([]);
+const dataList = ref<any>([]); // 最近聊天消息列表
 const index = ref<any>()
 const clickChat = ref<any>();
 onMounted(() => {
@@ -76,9 +76,16 @@ onMounted(() => {
 });
 const emit = defineEmits(["getValue"]);
 const onSearch = (searchValue: string) => {
-  console.log("use value", searchValue);
-  console.log("or use this.value", value.value);
+  // dataList.value =  dataList.value.filter(function(item) {
+  //   console.log("item: ", item)
+  //   return item.name.indexOf(searchValue) > 0
+  // })
 };
+const searchList = computed(() => {
+  return dataList.value.filter((item) => {
+    return item.name.toLowerCase().match(searchValue.value.toLowerCase())
+  })
+})
 const handleOpenPlus = () => {
   openPlusRef.value.showModal();
 };
