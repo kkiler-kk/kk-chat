@@ -22,14 +22,14 @@
 import { ref, onMounted } from "vue";
 import { listFriend } from "@/api/userFriend/userFriend";
 import {groupAdd} from '@/api/group/index'
-import { Session } from "@/utils/storage";
+import { Local } from "@/utils/storage";
 import { message } from "ant-design-vue";
 const open = ref<boolean>(false);
 const handleOk = (e: MouseEvent) => {
   if (formState.value.name == "") {
     return
   }
-  let userInfo = Session.get("userInfo")
+  let userInfo = Local.get("userInfo")
   formState.value.ownerId = userInfo.id
   groupAdd(formState.value).then((res) => {
     console.log("创建成功")

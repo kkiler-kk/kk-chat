@@ -18,6 +18,7 @@ func WebSocket(group *gin.RouterGroup) {
 	websocket.Start()
 	// 注册ws消息路由
 	websocket.RegisterMsg(websocket.EventHandlers{
+		"quit":           service.MessageService.Quit,           // 退出组
 		"recentChatList": service.MessageService.RecentChatList, // 返回最近聊天消息列表
 		"sendMessage":    service.MessageService.SendMessage,    // 接收到客户端发送过来的消息
 		"ping":           service.MessageService.Ping,           // 心跳

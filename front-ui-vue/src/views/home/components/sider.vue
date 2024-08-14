@@ -53,9 +53,9 @@ import Setting from "@/views/home/components/viewsSoder/setting.vue";
 import Like from "@/views/home/components/viewsSoder/like.vue";
 import Message from "@/views/home/components/viewsSoder/recentMessage.vue";
 import Contact from "@/views/home/components/viewsSoder/contact.vue";
-import { ref, onMounted,watch } from "vue";
-import { Session } from "@/utils/storage";
-const whichComponent = ref(UserInfo);
+import { ref, onMounted,watch, markRaw } from "vue";
+import { Local } from "@/utils/storage";
+const whichComponent = ref(markRaw(UserInfo));
 const emit = defineEmits(['getValue'])
 const userInfo = ref<any>({
   avatar: 'http://127.0.0.1:9345/resource/public/file/20240403/douwei.jpg'
@@ -63,7 +63,7 @@ const userInfo = ref<any>({
 const clickChat = ref<any>({name: 'hello'})
 const index = ref<number>()
 onMounted(() => {
-  userInfo.value = Session.get('userInfo')
+  userInfo.value = Local.get('userInfo')
   if (userInfo.value == null){
     return 
   }

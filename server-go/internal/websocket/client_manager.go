@@ -47,16 +47,19 @@ func NewClientManager() (clientManager *ClientManager) {
 	return
 }
 
-func Manager() *ClientManager {
-	return clientManager
-}
-
 // InClient 客户端是否存在
 func (manager *ClientManager) InClient(client *Client) (ok bool) {
 	manager.ClientsLock.RLock()
 	defer manager.ClientsLock.RUnlock()
 	_, ok = manager.Clients[client]
 	return
+}
+
+// SendLogin @Title 触发登录事件
+func (manager *ClientManager) SendLogin(UserId int64, Client *Client) {
+	manager.ClientsLock.RLock()
+	defer manager.ClientsLock.RUnlock()
+	clientManager.Login <- &login{UserId: UserId, Client: Client}
 }
 
 // IdInClient 通过id 判断客户端是否存在 存在返回实例
@@ -262,11 +265,9 @@ func (manager *ClientManager) start() {
 		case login := <-manager.Login:
 			// 用户登录
 			manager.EventLogin(login)
-
 		case conn := <-manager.Unregister:
 			// 断开连接事件
 			manager.EventUnregister(conn)
-
 		case message := <-manager.Broadcast:
 			// 全部客户端广播事件
 			clients := manager.GetClients()

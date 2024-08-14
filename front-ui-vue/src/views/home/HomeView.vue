@@ -28,7 +28,7 @@ import Footer from "@/views/home/components/footer.vue";
 import { createSocket, sendMsg } from "@/utils/websocket";
 import { onMounted, ref } from "vue";
 import { message } from "ant-design-vue";
-import { Session } from "@/utils/storage";
+import { Local } from "@/utils/storage";
 import router from "@/router";
 const headerStyle: CSSProperties = {
   textAlign: "center",
@@ -67,8 +67,7 @@ const footerStyle: CSSProperties = {
 onMounted(() => {
   console.log("Download the sub-item address");
   console.log("https://github.com/KKiller-op/java-chat-room");
-  console.log('Session.get("token")', Session.get("token"));
-  if (Session.get("token") == undefined) {
+  if (Local.get("token") == undefined) {
     // 检查是否登录
     message.error("登录状态已过期，请重新登录");
     setTimeout(() => {

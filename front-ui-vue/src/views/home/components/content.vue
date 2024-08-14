@@ -5,12 +5,7 @@
         <li v-for="(message, index) in messageList" class="d-flex message">
           <div class="content" :class="{ self: userInfo.id == message?.user?.id }">
             <div class="mr-lg-3 me-2">
-              <a-avatar
-                shape="square"
-                class="avatar"
-                :src="message?.user?.avatar"
-                size="large"
-              />
+              <a-avatar shape="square" class="avatar" :src="message?.user?.avatar" size="large" />
             </div>
             <div class="message-body">
               <div class="name">
@@ -33,7 +28,7 @@ import { sendMsg, getSocket } from "@/utils/websocket";
 import logo from "@/assets/images/chat.png";
 import { isJsonString } from "@/utils/is";
 import { formatPast } from "@/utils/formatTime";
-import { Session } from "@/utils/storage";
+import { Local } from "@/utils/storage";
 import { message } from "ant-design-vue";
 
 interface Props {
@@ -45,12 +40,12 @@ const messageList = ref<any>([]);
 const userInfo = ref<any>();
 const scrollIV = ref<HTMLElement | null>(null);
 onMounted(() => {
-  userInfo.value = Session.get("userInfo");
+  userInfo.value = Local.get("userInfo");
   if (userInfo == undefined) {
     message.error("请先登录!");
     return;
   }
-  console.log("scrollIV", scrollIV.value.scrollTop);
+  // console.log("scrollIV", scrollIV.value.scrollTop);
   window.addEventListener("onmessageWS", getSocketData);
 });
 // 监听 点击对象值的变换 请求获取历史消息
@@ -69,14 +64,22 @@ watch(
 
 async function getSocketData(data) {
   const messageModel = data.detail.event;
-  if (messageModel.event == "messageList") {
+  if (messageModel.event == "messageList") {  // 获取点击聊天记录
     messageList.value = messageModel.data;
-  } else if (messageModel.event == "sendMessage") {
-    if (
-      props.clickChat.id == messageModel.data.targetId ||
-      messageModel.data.userId == props.clickChat.id
-    ) { // 如果刚好和他聊天 就添加进当前消息聊天记录
-      messageList.value.push(messageModel.data);
+  } else if (messageModel.event == "sendMessage") {  // 在页面判断是否在统一聊天框聊天
+    console.log("props", props.clickChat)
+    console.log("message", messageModel)
+    if (messageModel.data.type == 1) { // 私聊
+      if (
+        props.clickChat.id == messageModel.data.targetId ||
+        messageModel.data.userId == props.clickChat.id
+      ) { // 如果刚好和他聊天 就添加进当前消息聊天记录
+        messageList.value.push(messageModel.data);
+      }
+    }else {
+      if (props.clickChat.id == messageModel.data.targetId) {
+        messageList.value.push(messageModel.data);
+      }
     }
   } else if (messageModel.event == "error") {
     message.error(messageModel.errorMsg);
@@ -96,20 +99,21 @@ async function getSocketData(data) {
   overflow-y: auto;
   height: 100%;
 }
+
 .content {
   display: flex;
   width: 100%;
   margin-bottom: 15px;
   /* flex-wrap: wrap; */
 }
+
 .message {
   width: 100%;
   display: flex;
   padding-left: 0;
   justify-content: space-between;
 }
-.message-body {
-}
+
 .name {
   width: 100%;
 }
@@ -119,6 +123,7 @@ async function getSocketData(data) {
   list-style: none;
   overflow: auto;
 }
+
 .message-row {
   /* margin-bottom: 16px; */
   margin-left: 5px;
@@ -134,6 +139,7 @@ async function getSocketData(data) {
   background-color: white;
   color: rgb(70, 74, 77);
 }
+
 .message-row::after {
   content: "";
   display: block;
@@ -145,18 +151,22 @@ async function getSocketData(data) {
   border-right: 3px solid white;
   border-bottom: 3px solid transparent;
 }
+
 .avatar {
   width: 40px;
   height: 40px;
 }
+
 .self {
   /* float: right; */
   flex-direction: row-reverse;
   margin-left: 20px;
 }
-.self  .message-row {
+
+.self .message-row {
   border-radius: 0px 32px 32px 32px;
 }
+
 .self::after {
   content: "";
   display: block;

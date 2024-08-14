@@ -1,7 +1,7 @@
 import axios from 'axios';
 import qs from 'qs';
 import { message, Modal } from 'ant-design-vue';
-import { Session } from '@/utils/storage';
+import { Local } from '@/utils/storage';
 const service = axios.create({
     // 环境变量，需要在.env文件中配置
     baseURL: import.meta.env.VITE_API_URL,
@@ -20,8 +20,8 @@ const service = axios.create({
 service.interceptors.request.use(
     (config) => {
         // 在发送请求之前做些什么 token
-        if (Session.get('token')) {
-            config.headers!['Authorization'] = `Bearer ${Session.get('token')}`;
+        if (Local.get('token')) {
+            config.headers!['Authorization'] = `Bearer ${Local.get('token')}`;
         }
         if (config.method === "get") {
             // get 传递的数组进行处理
@@ -44,7 +44,7 @@ service.interceptors.response.use(
         const res = response.data;
         const code = response.data.code
         if (response.headers["reset-authorization"]) {
-            Session.set('token', response.headers["reset-authorization"]);
+            Local.set('token', response.headers["reset-authorization"]);
         }
         if (status == 200) {
             const { code, data, msg } = response.data;
@@ -60,7 +60,7 @@ service.interceptors.response.use(
                     title: () => '提示',
                     content: () => '登录状态已过期，请重新登录'
                 })
-                Session.clear(); // 清除浏览器全部临时缓存
+                Local.clear(); // 清除浏览器全部临时缓存
                 window.location.href = '/'; // 去登录页
             } else if (code !== 0) {
                 message.error(res.message)
@@ -82,6 +82,7 @@ service.interceptors.response.use(
             if (error.response.data) message.error(error.response.statusText);
             else message.error('接口路径找不到');
         }
+        
         return Promise.reject(error);
     }
 );

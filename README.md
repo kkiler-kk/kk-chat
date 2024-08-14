@@ -17,6 +17,21 @@
  - ant-design
  - TS
 
+## 使用教程
+> 先去server-go/resource/sql/chat.sql 导入最新的sql 
+> 
+> 后端 使用 go mod tidy 下载相对应的包
+> 
+>   运行 main.go 文件 go run main.go
+> 
+> 前端
+> 
+>  npm install -g yarn
+> 
+>  yarn install
+> 
+>  yarn dev
+
 
 #### 文件
 - config 配置文件 ./mainifest/config/app.toml

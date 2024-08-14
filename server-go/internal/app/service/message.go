@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/mitchellh/mapstructure"
 	"github.com/rs/zerolog/log"
+	"server-go/common/utility"
 	"server-go/common/utility/mongoUtils"
 	"server-go/common/utility/redisUtil"
 	"server-go/internal/app/core/config"
@@ -22,9 +23,6 @@ import (
 var MessageService = &messageService{}
 
 type messageService struct {
-}
-
-func init() { // 初始化 websocket 路由
 }
 
 // TODO 优化代码
@@ -66,7 +64,7 @@ func (m *messageService) SendMessage(c *gin.Context, client *websocket.Client, r
 		Code:  500,
 	}
 	message.CreateTime = time.Now()
-	go m.RecentChatList(c, client, nil) // 刷新一下自己聊天记录
+	go m.RecentChatList(c, client, nil) // 刷新一下自己最近聊天
 	id := ""
 	if message.Type == 1 { // 1 为私聊
 		// 私聊情况key为这样 type:? 类型1 -> 2 发消息
@@ -87,7 +85,6 @@ func (m *messageService) SendMessage(c *gin.Context, client *websocket.Client, r
 			// 更新对方客户端最近聊天列表
 			m.RecentChatList(c, targetClient, req)
 		}
-		client.SendMsg(wResponse) // 给客户端发送
 	} else if message.Type == 2 && GroupService.IsGroupExist(message.TargetId, message.UserId) { // 群聊关系 并且 是群里成员
 		// 群聊id  key 为type:&d--%s 其中%s为群聊id
 		id = fmt.Sprintf("type:%d->%s", message.Type, websocket.GetUserKey(message.TargetId))
@@ -101,6 +98,7 @@ func (m *messageService) SendMessage(c *gin.Context, client *websocket.Client, r
 	if err != nil {
 		log.Error().Msgf("消息存储mongodb错误 %s", id)
 	}
+	client.SendMsg(wResponse)            // 给客户端发送
 	_ = redisUtil.Incr(c, redisCountKey) // 聊天总数 + 1
 }
 
@@ -196,7 +194,17 @@ func (m *messageService) setRecentChat(c *gin.Context, id int64, userRecentModel
 	return
 }
 
+// Ping @Title 心跳
 func (m *messageService) Ping(c *gin.Context, client *websocket.Client, req *websocket.WRequest) {
 	UserBasicService.UpdateHeartTime(client.User.ID) // 更新一下心跳时间
 	websocket.SendSuccess(client, req.Event)
+}
+
+// Quit @Title 退出组
+func (m *messageService) Quit(c *gin.Context, client *websocket.Client, req *websocket.WRequest) {
+	name := req.Data["id"].(string)
+	if utility.InArray(name, client.Tags) {
+		// 删除元素
+	}
+	// 返回client.Tags
 }

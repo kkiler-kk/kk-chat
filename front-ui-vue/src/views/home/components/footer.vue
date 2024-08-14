@@ -28,7 +28,7 @@ import { ref } from "vue";
 import { MehOutlined, ArrowRightOutlined,AudioOutlined } from "@ant-design/icons-vue";
 import { message } from "ant-design-vue";
 import { sendMsg, getSocket } from "@/utils/websocket";
-import { Session } from "@/utils/storage";
+import { Local } from "@/utils/storage";
 interface DataItem {
   content: string; // 发送内容
   userId: number; // 发送者id
@@ -63,7 +63,7 @@ const handleSendMsg = () => { // 发送消息
     message.error('请选择聊天对象!')
     return
   }
-  let userInfo = Session.get("userInfo")
+  let userInfo = Local.get("userInfo")
   if (userInfo == undefined) {
     message.error("请先登录!")
     return

@@ -33,7 +33,8 @@ type Client struct {
 	CloseSignal   chan struct{}     // 关闭信号
 	FirstTime     uint64            // 首次连接时间
 	HeartbeatTime uint64            // 用户上次心跳时间
-	Tags          []int64           // 标签  群聊id若有次id 就推送消息
+	Tags          []int64           // 标签
+	GroupIds      []int64           // 群聊id若有次id 就推送消息
 	User          *models.UserBasic // 用户信息
 	context       *gin.Context      // Custom context for internal usage purpose.
 	IP            string            // 客户端IP
@@ -112,7 +113,7 @@ func SendSuccess(client *Client, event string, data ...interface{}) {
 	client.SendMsg(&WResponse{
 		Event:     event,
 		Data:      d,
-		Code:      200,
+		Code:      consts.StatusOK,
 		Timestamp: time.Now().Unix(),
 	})
 	before(client)

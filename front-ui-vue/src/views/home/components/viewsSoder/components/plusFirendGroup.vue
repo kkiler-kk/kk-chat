@@ -91,7 +91,7 @@ import { addFriend } from "@/api/userFriend/userFriend";
 import { findByName } from "@/api/group";
 import { ExclamationCircleOutlined } from "@ant-design/icons-vue";
 import { userSearch } from "@/api/userBasic/userBasic";
-import { Session } from "@/utils/storage";
+import { Local } from "@/utils/storage";
 const open = ref<boolean>(false);
 const form = ref({
   type: 1, // 1找好友 2 找群
@@ -109,7 +109,7 @@ const handleOk = (e: MouseEvent) => {
   open.value = false;
 };
 const handleAddFriend = (item) => {
-  let userInfo = Session.get("userInfo");
+  let userInfo = Local.get("userInfo");
   let data = {
     userId: userInfo.id,
     friendId: item.id,

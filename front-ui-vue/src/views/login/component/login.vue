@@ -55,7 +55,7 @@ import { reactive, ref ,onMounted } from "vue";
 import { UserOutlined, LockOutlined, SettingFilled } from '@ant-design/icons-vue';
 import {captchaGenerate} from '@/api/auth/auth'
 import {login} from '@/api/userBasic/userBasic'
-import { Session } from '@/utils/storage';
+import { Local } from '@/utils/storage';
 import router from "@/router";
 interface FormState {
   username: string;
@@ -84,12 +84,12 @@ const formState = reactive<FormState>({
 const onFinish = (values: any) => {
   loginLoading.value = true
   login(formState).then((res: any) => {
-    Session.set('token', res.token)
-    Session.set('userInfo', res.user)  // 将信息载入浏览器本地缓存
+    Local.set('token', res.token)
+    Local.set('userInfo', res.user)  // 将信息载入浏览器本地缓存
     loginLoading.value = false
     setTimeout(() => {
         router.push({
-          name: "home",
+          name: "Home",
         });
       }, 200);
   }).catch((err) => {

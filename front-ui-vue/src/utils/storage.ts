@@ -10,19 +10,23 @@ import Cookies from 'js-cookie';
 export const Local = {
 	// 设置永久缓存
 	set(key: string, val: any) {
+		if (key === 'token') return Cookies.set(key, val);
 		window.localStorage.setItem(key, JSON.stringify(val));
 	},
 	// 获取永久缓存
 	get(key: string) {
+		if (key === 'token') return Cookies.get(key);
 		let json: any = window.localStorage.getItem(key);
 		return JSON.parse(json);
 	},
 	// 移除永久缓存
 	remove(key: string) {
+		if (key === 'token') return Cookies.remove(key);
 		window.localStorage.removeItem(key);
 	},
 	// 移除全部永久缓存
 	clear() {
+		Cookies.remove('token');
 		window.localStorage.clear();
 	},
 };

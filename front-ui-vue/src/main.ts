@@ -18,7 +18,7 @@ app.use(antDesign)
 app.use(createPinia())
 app.use(router)
 app.component('Vue3EmojiPicker', Vue3EmojiPicker)
-setupStore(app);
+// setupStore(app);
 
 // 挂载状态管理
 app.mount('#app')

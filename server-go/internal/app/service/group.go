@@ -51,7 +51,7 @@ func (g *groupService) List(userId int64) (list []*response.UserGroupListModelRe
 			Name:        group.Name,
 			Avatar:      group.Avatar,
 			Identity:    group.Identity,
-			CountMember: 0,
+			CountMember: GroupMemberService.Count(group.ID),
 		}
 	}
 	return
@@ -68,7 +68,7 @@ func (g *groupService) FindGroupName(c *gin.Context, name string) (result []*res
 			Avatar:   temp.Avatar,
 			Name:     temp.Name,
 			Identity: temp.Identity,
-			
+
 			IsFriend: false,
 		}
 	}

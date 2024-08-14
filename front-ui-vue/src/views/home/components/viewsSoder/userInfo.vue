@@ -49,10 +49,9 @@
 </template>
 <script setup lang="ts">
 import cover from "@/assets/images/login.jpg";
-import { onMounted } from "vue";
-import { Session } from "@/utils/storage";
+import { onMounted,ref } from "vue";
+import { Local } from "@/utils/storage";
 import { logout } from "@/api/userBasic/userBasic";
-import { ref } from "vue";
 import { message } from "ant-design-vue";
 import router from "@/router";
 import {
@@ -68,8 +67,7 @@ const userInfo = ref<any>({});
 const spinning = ref<boolean>(true);
 const updateUserInfoRef = ref()
 onMounted(() => {
-  let user = Session.get("userInfo");
-  console.log('user: ', user)
+  let user = Local.get("userInfo");
   spinning.value = true;
   if (user == null) {
     spinning.value = false;
@@ -82,8 +80,7 @@ onMounted(() => {
 const handlLogout = () => {
   logout().then((res) => {
     message.success("退出成功!");
-    Session.set("token", "");
-  Session.set("userInfo", "");
+    Local.clear();
   });
   setTimeout(() => {
     // 重新登录 跳转登录路由

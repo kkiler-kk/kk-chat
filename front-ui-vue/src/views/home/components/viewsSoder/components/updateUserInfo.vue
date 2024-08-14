@@ -1,98 +1,46 @@
 <template>
   <div class="box">
     <a-modal v-model:visible="open" title="修改信息" @ok="handleOk">
-      <a-form
-        :model="formState"
-        name="basic"
-        ref="formRef"
-        autocomplete="off"
-        @finish="handleOk"
-        @finishFailed="onFinishFailed"
-      >
+      <a-form :model="formState" name="basic" ref="formRef" autocomplete="off" @finish="handleOk"
+        @finishFailed="onFinishFailed">
         <a-form-item label="头像">
-          <a-upload
-            v-model:file-list="fileList"
-            name="avatar"
-            list-type="picture-card"
-            class="avatar-uploader"
-            :show-upload-list="false"
-            :before-upload="beforeUpload"
-            @change="handleChange"
-            :customRequest="handleUpload"
-          >
+          <a-upload v-model:file-list="fileList" name="avatar" list-type="picture-card" class="avatar-uploader"
+            :show-upload-list="false" :before-upload="beforeUpload" @change="handleChange"
+            :customRequest="handleUpload">
             <a-avatar v-if="formState.avatar" :src="formState.avatar" alt="avatar" :size="100" />
             <div v-else>
-              <loading-outlined v-if="loading"></loading-outlined>
-              <plus-outlined v-else></plus-outlined>
+              <LoadingOutlined v-if="loading"></LoadingOutlined>
+              <PlusOutlined v-else></PlusOutlined>
               <div class="ant-upload-text">Upload</div>
             </div>
           </a-upload>
         </a-form-item>
-        <a-form-item
-          label="用户名"
-          name="username"
-          :rules="[{ required: true, message: '请输入用户名!' }]"
-        >
-          <a-input
-            v-model:value="formState.username"
-            class="input"
-            placeholder="请输入用户名"
-          />
+        <a-form-item label="用户名" name="username" :rules="[{ required: true, message: '请输入用户名!' }]">
+          <a-input v-model:value="formState.username" class="input" placeholder="请输入用户名" />
         </a-form-item>
-        <a-form-item
-          label="ID"
-          name="identity"
-          :rules="[{ required: true, message: '请输入ID!' }]"
-        >
-          <a-input
-            v-model:value="formState.identity"
-            class="input"
-            placeholder="请输入ID"
-          />
+        <a-form-item label="ID" name="identity" :rules="[{ required: true, message: '请输入ID!' }]">
+          <a-input v-model:value="formState.identity" class="input" placeholder="请输入ID" />
         </a-form-item>
-        <a-form-item
-          label="邮箱"
-          name="email"
-          :rules="[
-            {
-              required: true,
-              message: '邮箱格式不正确!',
-              pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,
-            },
-          ]"
-        >
-          <a-input
-            v-model:value="formState.email"
-            class="input"
-            placeholder="请输入邮箱地址"
-          />
+        <a-form-item label="邮箱" name="email" :rules="[
+          {
+            required: true,
+            message: '邮箱格式不正确!',
+            pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,
+          },
+        ]">
+          <a-input v-model:value="formState.email" class="input" placeholder="请输入邮箱地址" />
         </a-form-item>
-        <a-form-item
-          label="验证码"
-          name="verificationCode"
-        >
-          <a-input
-            v-model:value="formState.verificationCode"
-            class="verificationCode"
-            placeholder="请输入验证码"
-          />
+        <a-form-item label="验证码" name="verificationCode">
+          <a-input v-model:value="formState.verificationCode" class="verificationCode" placeholder="请输入验证码" />
           <a-button style="margin-left: 10px" @click="sendEmail">发送</a-button>
         </a-form-item>
-        <a-form-item
-          label="手机号"
-          name="phone"
-          :rules="[
-            {
-              pattern: /^1(3\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/,
-              message: '请输入正确手机号',
-            },
-          ]"
-        >
-          <a-input
-            v-model:value="formState.phone"
-            class="input"
-            placeholder="请输入手机号"
-          />
+        <a-form-item label="手机号" name="phone" :rules="[
+          {
+            pattern: /^1(3\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/,
+            message: '请输入正确手机号',
+          },
+        ]">
+          <a-input v-model:value="formState.phone" class="input" placeholder="请输入手机号" />
         </a-form-item>
       </a-form>
     </a-modal>
@@ -101,11 +49,12 @@
 <script lang="ts" setup>
 import { reactive, ref, onMounted } from "vue";
 import { message } from "ant-design-vue";
+import { LoadingOutlined,PlusOutlined } from "@ant-design/icons-vue";
 import { sendEmailCode } from "@/api/auth/auth.ts";
 import { updateUserBasic } from "@/api/userBasic/userBasic.ts";
 import type { UploadChangeParam, UploadProps } from "ant-design-vue";
 import { uploadImages } from "@/api/file/file";
-import { Session } from "@/utils/storage";
+import { Local } from "@/utils/storage";
 import { detail } from "@/api/userBasic/userBasic";
 const open = ref<boolean>(false);
 interface FormState {
@@ -136,11 +85,11 @@ onMounted(() => {
 });
 
 
-const onFinishFailed = (errorInfo: any) => {};
+const onFinishFailed = (errorInfo: any) => { };
 
 const handleOk = (e: MouseEvent) => {
   formRef.value.validateFields()
-  let userInfo = Session.get("userInfo");
+  let userInfo = Local.get("userInfo");
   formState.id = userInfo.id;
   updateUserBasic(formState)
     .then((res) => {
@@ -209,7 +158,7 @@ const handleChange = (info: UploadChangeParam) => {
 };
 const showModal = () => {
   open.value = true;
-  let userInfo = Session.get("userInfo");
+  let userInfo = Local.get("userInfo");
   if (userInfo == null) {
     return
   }
@@ -239,18 +188,22 @@ defineExpose({
 .text {
   color: rgb(0, 89, 128);
 }
+
 .ant-form {
   width: 100%;
   height: 100%;
 }
+
 .box {
   width: 80%;
   position: relative;
   left: 10%;
 }
+
 .input {
   width: 80%;
 }
+
 .verificationCode {
   width: 50%;
 }

@@ -74,6 +74,8 @@ func (u *userBasicService) Login(c *gin.Context, input request.UserBasicLoginReq
 	token, err := authUtil.GenToken(user.ID)
 	jsonStr, _ := json.Marshal(user)
 	_ = redisUtil.Set(c, config.Instance().Token.CacheKey+token, string(jsonStr), config.Instance().Token.TimeOut*time.Minute)
+	// 登录成功链接websocket
+	//websocket.GetClientManager().SendLogin()
 	res = &response.LoginModelRes{
 		Token: token,
 		User: &response.UserDetailModelRes{

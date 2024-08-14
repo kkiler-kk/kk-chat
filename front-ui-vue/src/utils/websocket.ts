@@ -1,4 +1,4 @@
-import { Session } from "./storage";
+import { Local } from "./storage";
 import { isJsonString } from '@/utils/is';
 let socket: WebSocket;
 let isActive: boolean;
@@ -49,10 +49,10 @@ let timer: ReturnType<typeof setTimeout>;
 export function createSocket() {
     console.log('createSocket...') // 创建websocket
     try {
-        if (Session.get('token') == '') {
+        if (Local.get('token') == '') {
             throw new Error('用户尚未登录， 请稍后重试。。。')
         }
-        socket = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL + "?token=" + Session.get("token"))
+        socket = new WebSocket(import.meta.env.VITE_WEBSOCKET_URL + "?token=" + Local.get("token"))
         init()
     } catch (e) {
         console.log('createSocket err:' + e);

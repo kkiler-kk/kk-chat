@@ -1,4 +1,4 @@
-package models
+package response
 
 type CommonResp struct {
 	Code  int           `json:"code"` //响应编码 0 成功 500 错误 403 无权限  -1  失败
@@ -6,6 +6,14 @@ type CommonResp struct {
 	Data  interface{}   `json:"data"` //数据内容
 	Type  OperationType `json:"type"` //业务类型
 	Count int           `json:"count,omitempty"`
+}
+
+func NewCommonResp(code int, msg string, Type OperationType) *CommonResp {
+	return &CommonResp{
+		Code: code,
+		Msg:  msg,
+		Type: Type,
+	}
 }
 
 type OperationType int

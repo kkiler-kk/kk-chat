@@ -3,23 +3,18 @@ package response
 import (
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"server-go/internal/app/models"
+	"server-go/internal/consts"
 )
 
 type ApiResp struct {
 	c *gin.Context
-	r *models.CommonResp
+	r *CommonResp
 }
 
 // 返回一个成功的消息体
 func SuccessResp(c *gin.Context) *ApiResp {
-	msg := models.CommonResp{
-		Code: 200,
-		Type: models.OperOther,
-		Msg:  "操作成功",
-	}
 	var a = ApiResp{
-		r: &msg,
+		r: SuccessCode,
 		c: c,
 	}
 	return &a
@@ -27,9 +22,9 @@ func SuccessResp(c *gin.Context) *ApiResp {
 
 // 返回一个错误的消息体
 func ErrorResp(c *gin.Context) *ApiResp {
-	msg := models.CommonResp{
-		Code: 500,
-		Type: models.OperOther,
+	msg := CommonResp{
+		Code: consts.StatusServerError,
+		Type: OperOther,
 		Msg:  "操作失败",
 	}
 	var a = ApiResp{
@@ -41,13 +36,8 @@ func ErrorResp(c *gin.Context) *ApiResp {
 
 // 返回一个拒绝访问的消息体
 func ForbiddenResp(c *gin.Context) *ApiResp {
-	msg := models.CommonResp{
-		Code: 403,
-		Type: models.OperOther,
-		Msg:  "无操作权限",
-	}
 	var a = ApiResp{
-		r: &msg,
+		r: StatusNotAccess,
 		c: c,
 	}
 	return &a
@@ -55,9 +45,9 @@ func ForbiddenResp(c *gin.Context) *ApiResp {
 
 // JWT认证失败
 func UnauthorizedResp(c *gin.Context) *ApiResp {
-	msg := models.CommonResp{
+	msg := CommonResp{
 		Code: 401,
-		Type: models.OperOther,
+		Type: OperOther,
 		Msg:  "鉴权失败",
 	}
 	var a = ApiResp{
@@ -86,7 +76,7 @@ func (resp *ApiResp) SetData(data interface{}) *ApiResp {
 }
 
 // 设置消息体的业务类型
-func (resp *ApiResp) SetType(btype models.OperationType) *ApiResp {
+func (resp *ApiResp) SetType(btype OperationType) *ApiResp {
 	resp.r.Type = btype
 	return resp
 }
