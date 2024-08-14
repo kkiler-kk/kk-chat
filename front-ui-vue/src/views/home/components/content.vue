@@ -1,15 +1,14 @@
 <template>
   <div>
-    <div class="container">
-      <ul class="list-unstyled py-4" id="scrollIV" ref="scrollIV">
+    <div class="container" id="scrollIV" ref="scrollIV">
+      <ul class="list-unstyled py-4" >
         <li v-for="(message, index) in messageList" class="d-flex message">
           <div class="content" :class="{ self: userInfo.id == message?.user?.id }">
             <div class="mr-lg-3 me-2">
-              <a-avatar shape="square" class="avatar" :src="message?.user?.avatar" size="large" />
+              <a-avatar shape="square" class="avatar" :src="message?.user?.avatar" size="large" @click="submitUserInfo"/>
             </div>
             <div class="message-body">
               <div class="name">
-                <!--  v-if="message.type != 1" -->
                 {{ message?.user?.name }} {{ formatPast(new Date(message?.createTime)) }}
               </div>
               <div class="message-row">
@@ -34,7 +33,7 @@ import { message } from "ant-design-vue";
 interface Props {
   clickChat?: any;
 }
-
+const flag = ref(false)
 const props = defineProps<Props>();
 const messageList = ref<any>([]);
 const userInfo = ref<any>();
@@ -71,27 +70,33 @@ async function getSocketData(data) {
     console.log("message", messageModel)
     if (messageModel.data.type == 1) { // 私聊
       if (
-        props.clickChat.id == messageModel.data.targetId ||
-        messageModel.data.userId == props.clickChat.id
+        props.clickChat?.id == messageModel.data.targetId ||
+        messageModel.data.userId == props.clickChat?.id
       ) { // 如果刚好和他聊天 就添加进当前消息聊天记录
         messageList.value.push(messageModel.data);
       }
     }else {
-      if (props.clickChat.id == messageModel.data.targetId) {
+      if (props.clickChat?.id == messageModel.data.targetId) {
         messageList.value.push(messageModel.data);
       }
     }
+    nextTick()
   } else if (messageModel.event == "error") {
     message.error(messageModel.errorMsg);
   }
 }
 
-// onMounted(() => {
-//   nextTick(() => {
-//     console.log("scrollIV", scrollIV.value.scrollHeight);
-//     scrollIV.value.scrollTo({ top: scrollIV.value.scrollHeight, behavior: "smooth" });
-//   });
-// })
+function submitUserInfo() {
+  flag.value = !flag.value
+}
+onMounted(() => {
+  nextTick()
+})
+function nextTick() {
+  if (scrollIV.value) {
+    scrollIV.value.scrollTop = scrollIV.value.scrollHeight
+  }
+}
 </script>
 <style scoped>
 .container {

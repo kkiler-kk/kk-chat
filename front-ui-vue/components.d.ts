@@ -42,6 +42,7 @@ declare module 'vue' {
     APopover: typeof import('ant-design-vue/es')['Popover']
     AResult: typeof import('ant-design-vue/es')['Result']
     ARow: typeof import('ant-design-vue/es')['Row']
+    ASpace: typeof import('ant-design-vue/es')['Space']
     ASpin: typeof import('ant-design-vue/es')['Spin']
     ASubMenu: typeof import('ant-design-vue/es')['SubMenu']
     ASwitch: typeof import('ant-design-vue/es')['Switch']
@@ -59,6 +60,7 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     Search: typeof import('./src/components/search/index.vue')['default']
     TheWelcome: typeof import('./src/components/TheWelcome.vue')['default']
+    UserInfo: typeof import('./src/components/card/userInfo.vue')['default']
     Vue3EmojiPicker: typeof import('./src/components/emoji/Vue3EmojiPicker.vue')['default']
     WelcomeItem: typeof import('./src/components/WelcomeItem.vue')['default']
   }

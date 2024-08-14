@@ -7,12 +7,16 @@
             <a-avatar :src="clickChat?.avatar" shape="square" class="avatar" size="large" />
           </div>
           <div>
-            <div class="d-flex align-items-center mb-1"><h6>{{ clickChat?.name }}</h6></div>
+            <div class="d-flex align-items-center mb-1">
+              <h6>{{ clickChat?.name }} <span v-if="clickChat?.type == 2">{{ clickChat?.countMember }}</span></h6>
+             
+            </div>
           </div>
+
         </div>
       </a-col>
       <a-col :span="8" :offset="8">
-      <!-- 暂定功能点 -->
+        <!-- 暂定功能点 -->
       </a-col>
     </a-row>
   </div>
@@ -23,7 +27,7 @@ import { UserInfo } from "@/store/userInfo";
 interface Props {
   clickChat?: UserInfo
 }
- defineProps<Props>()
+defineProps<Props>()
 // const clickChat = ref<UserInfo>(props.clickChat)
 // onMounted(() => {
 //   console.log("header: ", props.clickChat)
