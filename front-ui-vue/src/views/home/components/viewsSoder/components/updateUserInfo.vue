@@ -18,6 +18,7 @@
         <a-form-item label="用户名" name="username" :rules="[{ required: true, message: '请输入用户名!' }]">
           <a-input v-model:value="formState.username" class="input" placeholder="请输入用户名" />
         </a-form-item>
+        
         <a-form-item label="ID" name="identity" :rules="[{ required: true, message: '请输入ID!' }]">
           <a-input v-model:value="formState.identity" class="input" placeholder="请输入ID" />
         </a-form-item>
@@ -42,6 +43,12 @@
         ]">
           <a-input v-model:value="formState.phone" class="input" placeholder="请输入手机号" />
         </a-form-item>
+        <a-form-item label="个性签名" name="personalitySignature">
+          <a-input v-model:value="formState.personalitySignature" class="input" placeholder="请输入个性签名" />
+        </a-form-item>
+        <a-form-item label="出生日期" name="birthDate">
+          <a-date-picker v-model:value="formState.birthDate" type="date" class="input" placeholder="请选择出生日期"/>
+        </a-form-item>
       </a-form>
     </a-modal>
   </div>
@@ -56,6 +63,8 @@ import type { UploadChangeParam, UploadProps } from "ant-design-vue";
 import { uploadImages } from "@/api/file/file";
 import { Local } from "@/utils/storage";
 import { detail } from "@/api/userBasic/userBasic";
+import type {Dayjs} from 'dayjs'
+import dayjs from 'dayjs'
 const open = ref<boolean>(false);
 interface FormState {
   id: number;
@@ -64,6 +73,8 @@ interface FormState {
   identity: string;
   email: string;
   phone: string;
+  personalitySignature: string,
+  birthDate: Dayjs | undefined,
   verificationCode: string; // 邮箱验证码
 }
 
@@ -75,6 +86,8 @@ const formState = reactive<FormState>({
   email: "",
   phone: "",
   verificationCode: "",
+  personalitySignature: "",
+  birthDate: undefined,
 });
 const formRef = ref(null)
 const fileList = ref([]);
@@ -164,13 +177,16 @@ const showModal = () => {
   }
   formState.id = userInfo.id;
   detail(formState.id.toString())
-    .then((res) => {
+    .then((res: any) => {
       formState.id = res.id;
       formState.username = res.name;
       formState.phone = res.phone;
       formState.identity = res.identity;
       formState.email = res.email;
       formState.avatar = res.avatar;
+      formState.personalitySignature = res.personalitySignature,
+      formState.birthDate = dayjs(res.birthDate)
+      console.log(formState.birthDate)
     })
     .catch((err) => {
     });

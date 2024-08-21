@@ -1,6 +1,9 @@
 package request
 
-import "server-go/internal/app/models"
+import (
+	"server-go/internal/app/models"
+	"time"
+)
 
 // UserBasicCreateReqInput @Title 添加时候添加
 type UserBasicCreateReqInput struct {
@@ -21,13 +24,15 @@ type UserBasicLoginReqInput struct {
 }
 
 type UserBasicUpdateReqInput struct {
-	ID               int64  `from:"id" binding:"required"`
-	Avatar           string `from:"avatar" binding:"required"`
-	UserName         string `form:"username" binding:"required"`
-	Identity         string `form:"identity" binding:"required"`
-	Email            string `form:"email" binding:"required,email"`
-	VerificationCode string `form:"verificationCode" binding:"required"`
-	Phone            string `form:"phone"`
+	ID                   int64     `from:"id" binding:"required"`
+	Avatar               string    `from:"avatar" binding:"required"`
+	UserName             string    `form:"username" binding:"required"`
+	Identity             string    `form:"identity" binding:"required"`
+	Email                string    `form:"email" binding:"required,email"`
+	VerificationCode     string    `form:"verificationCode" binding:"required"`
+	PersonalitySignature string    `form:"personalitySignature"`
+	BirthDate            time.Time `from:"birthDate"`
+	Phone                string    `form:"phone"`
 }
 
 type UserSearchReqInput struct {

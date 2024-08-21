@@ -14,7 +14,6 @@ func AuthMiddlewareUpdate(c *gin.Context) {
 		authHeader = c.Query("token")
 		authHeader = "Bearer " + authHeader
 		if "" == authHeader || authHeader == "undefined" {
-
 			c.JSON(http.StatusOK, gin.H{
 				"code": 2003,
 				"msg":  "请重新登录",

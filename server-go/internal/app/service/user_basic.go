@@ -79,13 +79,15 @@ func (u *userBasicService) Login(c *gin.Context, input request.UserBasicLoginReq
 	res = &response.LoginModelRes{
 		Token: token,
 		User: &response.UserDetailModelRes{
-			ID:        user.ID,
-			Name:      user.Name,
-			Avatar:    user.Avatar,
-			Phone:     user.Phone,
-			Email:     user.Email,
-			Identity:  user.Identity,
-			CreatedAt: user.CreatedAt,
+			ID:                   user.ID,
+			Name:                 user.Name,
+			Avatar:               user.Avatar,
+			Phone:                user.Phone,
+			Email:                user.Email,
+			Identity:             user.Identity,
+			PersonalitySignature: user.PersonalitySignature,
+			BirthDate:            user.BirthDate,
+			CreatedAt:            user.CreatedAt,
 		},
 	}
 	return res, err
@@ -98,14 +100,32 @@ func (u *userBasicService) UserDetail(c *gin.Context, id int64) (res *response.U
 		log.Error().Msg(err.Error())
 		return
 	}
+
 	res = &response.UserDetailModelRes{
-		ID:        user.ID,
-		Avatar:    user.Avatar,
-		Name:      user.Name,
-		Phone:     user.Phone,
-		Email:     user.Email,
-		Identity:  user.Identity,
-		CreatedAt: user.CreatedAt,
+		ID:                   user.ID,
+		Avatar:               user.Avatar,
+		Name:                 user.Name,
+		Identity:             user.Identity,
+		CreatedAt:            user.CreatedAt,
+		PersonalitySignature: user.PersonalitySignature,
+		BirthDate:            user.BirthDate,
+		IsFriend:             false,
+	}
+
+	idAny, ok := c.Get("id") // 获取当前登录用户id
+	if ok {                  // 说明有用户登录
+		userId := idAny.(int64)
+		if userId == id { // 自己获取自己 返回用户信息
+			res.Phone = user.Phone
+			res.Email = user.Email
+			res.IsFriend = true
+			return res, nil
+		}
+		res.IsFriend = UserFriendService.IsFriend(userId, user.ID) // 判断是否为好好友关系
+		if res.IsFriend {                                          // 好友关系返回用户隐私
+			res.Phone = user.Phone
+			res.Email = user.Email
+		}
 	}
 	return
 }
@@ -156,12 +176,14 @@ func (u *userBasicService) Logout(c *gin.Context) (err error) {
 // UpdateUserBasic @Title 更新用户信息
 func (u *userBasicService) UpdateUserBasic(c *gin.Context, input request.UserBasicUpdateReqInput) (err error) {
 	var userBasicModel = &models.UserBasic{
-		ID:       input.ID,
-		Name:     input.UserName,
-		Phone:    input.Phone,
-		Email:    input.Email,
-		Avatar:   input.Avatar,
-		Identity: input.Identity,
+		ID:                   input.ID,
+		Name:                 input.UserName,
+		Phone:                input.Phone,
+		Email:                input.Email,
+		Avatar:               input.Avatar,
+		PersonalitySignature: input.PersonalitySignature,
+		BirthDate:            input.BirthDate,
+		Identity:             input.Identity,
 	}
 	code, err := redisUtil.Get(c, consts.CodeEmail+userBasicModel.Email)
 	if code == "" && input.VerificationCode == "" { // 说明人家没想改邮箱

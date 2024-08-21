@@ -23,7 +23,7 @@ export function login(data){
     })
 }
 
-export function detail(id: string) {
+export function detail(id: any) {
     return request({
         url: '/api/app/user/detail/' + id,
         method: 'post'

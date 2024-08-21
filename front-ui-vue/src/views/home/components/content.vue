@@ -1,7 +1,7 @@
 <template>
   <div>
-    <div class="container" id="scrollIV" ref="scrollIV">
-      <ul class="list-unstyled py-4" >
+    <div class="container" >
+      <ul class="list-unstyled py-4" id="scrollIV" ref="scrollIV">
         <li v-for="(message, index) in messageList" class="d-flex message">
           <div class="content" :class="{ self: userInfo.id == message?.user?.id }">
             <div class="mr-lg-3 me-2">
