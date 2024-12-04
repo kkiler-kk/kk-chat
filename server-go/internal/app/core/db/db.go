@@ -40,4 +40,5 @@ func InitMySQL() {
 		return
 	}
 	conn = db
+	log.Info().Msg("链接数据库成功~")
 }

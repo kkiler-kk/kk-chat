@@ -11,4 +11,6 @@ var (
 	SysType = runtime.GOOS
 	// Blacklists 黑名单列表
 	Blacklists map[string]struct{}
+	// 程序启动的打印字符串(banner)
+	StartStr string
 )

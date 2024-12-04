@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -35,4 +36,5 @@ func InitMongoDB() {
 		panic(err)
 	}
 	mongoCli = client
+	log.Info().Msg("mongodb connect success~")
 }

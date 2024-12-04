@@ -15,6 +15,7 @@ func InitRouter() {
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 	r.Use(middleware.Cors())
+	log.Info().Msg("start gin router~")
 	group := r.Group("api")
 	router.InitAppRouter(group)
 	// 初始化websocket路由

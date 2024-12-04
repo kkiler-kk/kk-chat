@@ -76,6 +76,7 @@ import { onMounted } from "vue";
 import {ref} from 'vue'
 import updateUserInfo from "@/views/home/components/viewsSoder/components/updateUserInfo.vue";
 import dayjs from "dayjs"
+import router from "@/router";
 import {detail} from "@/api/userBasic/userBasic"
 import Icon, {
   UserOutlined,
@@ -100,6 +101,10 @@ const getUserDetail = () => {
   detail(props.id).then((res) => {
     userInfo.value = res
   }).catch((err) => {
+    // 重新登录 跳转登录路由
+    router.push({
+        name: "login",
+      });
   })
 }
 const handleUpdateInfo = () => {

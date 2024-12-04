@@ -29,4 +29,5 @@ func InitRedis() {
 		return
 	}
 	redisCli = client
+	log.Info().Msg("链接Redis成功~")
 }
