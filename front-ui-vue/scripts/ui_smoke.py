@@ -95,6 +95,34 @@ with sync_playwright() as p:
     check("设置面板渲染", page.locator(".id-account").count() == 1)
     page.screenshot(path="/tmp/ui-7-settings.png")
 
+
+    # 9. bug 修复验证：陌生人卡片有「发消息」入口
+    page.click('.nav-item[title="联系人"]')
+    page.wait_for_timeout(500)
+    page.click('.ops button')  # 添加好友 → 搜索弹窗
+    page.wait_for_timeout(500)
+    page.fill('input[placeholder="按账号 / 昵称 / 邮箱搜索"]', "kk003")
+    page.wait_for_timeout(800)
+    page.locator(".result-row").first.click()
+    page.wait_for_timeout(800)
+    check("陌生人卡片显示发消息入口", page.locator('.ant-modal button:has-text("发消息")').count() >= 1)
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(300)
+    page.keyboard.press("Escape")
+    page.wait_for_timeout(300)
+
+    # 10. bug 修复验证：群聊头部有「邀请」入口且弹窗可用
+    page.click('.nav-item[title="消息"]')
+    page.wait_for_timeout(300)
+    page.locator(".conv-item", has=page.locator(".conv-name", has_text="重构测试群")).first.click()
+    page.wait_for_timeout(800)
+    check("群聊头部显示邀请按钮", page.locator('.chat-header .invite-btn').count() == 1)
+    page.click('.chat-header .invite-btn')
+    page.wait_for_timeout(500)
+    check("邀请弹窗渲染好友选项", page.locator(".ant-modal .ant-checkbox-wrapper").count() >= 1)
+    page.screenshot(path="/tmp/ui-8-invite.png")
+    page.keyboard.press("Escape")
+
     js_errors = [e for e in errors if "favicon" not in e.lower()]
     check("无 JS 运行时错误", len(js_errors) == 0, str(js_errors[:3]))
 

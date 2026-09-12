@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import { PictureOutlined, SendOutlined } from '@ant-design/icons-vue'
+import { PictureOutlined, SendOutlined, UsergroupAddOutlined } from '@ant-design/icons-vue'
 import { useChatStore } from '@/stores/chat'
 import { useAuthStore } from '@/stores/auth'
 import { usePresenceStore } from '@/stores/presence'
@@ -9,6 +9,7 @@ import { uploadImage } from '@/api/file'
 import { ErrCode } from '@/types/errorcode'
 import MessageBubble from '@/components/MessageBubble.vue'
 import EmojiPicker from '@/components/EmojiPicker.vue'
+import InviteMemberModal from '@/components/InviteMemberModal.vue'
 
 const chat = useChatStore()
 const auth = useAuthStore()
@@ -17,6 +18,7 @@ const presence = usePresenceStore()
 const draft = ref('')
 const sending = ref(false)
 const limitAlert = ref(false)
+const inviteOpen = ref(false)
 const listRef = ref<HTMLElement | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
 
@@ -106,7 +108,13 @@ async function onPickImage(e: Event) {
         <span v-if="conv.type === 'private'" class="status" :class="{ on: online }">
           {{ online ? '在线' : '离线' }}
         </span>
-        <span v-else class="status">群聊</span>
+        <template v-else>
+          <span class="status">群聊</span>
+          <a-button size="small" class="invite-btn" @click="inviteOpen = true">
+            <template #icon><UsergroupAddOutlined /></template>
+            邀请
+          </a-button>
+        </template>
       </div>
 
       <div ref="listRef" class="msg-list" @scroll="onScroll">
@@ -124,6 +132,12 @@ async function onPickImage(e: Event) {
         show-icon
         banner
         message="非好友关系发送消息超过 3 条，请先添加对方为好友"
+      />
+
+      <InviteMemberModal
+        v-if="conv.type === 'group'"
+        v-model:open="inviteOpen"
+        :group-id="conv.peer_id"
       />
 
       <div class="input-area">

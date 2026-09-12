@@ -38,6 +38,10 @@ type CreateGroupReq struct {
 	MemberIDs []int64 `json:"member_ids"`
 }
 
+type InviteReq struct {
+	UserIDs []int64 `json:"user_ids" validate:"required,min=1"`
+}
+
 type SendMessageReq struct {
 	ConversationID string `json:"conversation_id" validate:"required"`
 	Content        string `json:"content" validate:"required,min=1,max=4096"`

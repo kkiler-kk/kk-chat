@@ -12,6 +12,7 @@ import (
 
 type GroupDeps struct {
 	Groups   port.GroupRepo
+	Users    port.UserRepo
 	Notifier port.Notifier
 	Clock    port.Clock
 }
@@ -77,6 +78,50 @@ func (u *groupUseCase) Join(ctx context.Context, groupID, userID int64) error {
 		u.d.Notifier.ToUsers(ctx, others, port.NotifierEvent{
 			Event: "group.updated", Data: map[string]any{"group_id": groupID},
 		})
+	}
+	return nil
+}
+
+// Invite 群成员邀请新成员：邀请人必须是群成员；已存在的成员静默跳过。
+func (u *groupUseCase) Invite(ctx context.Context, inviterID, groupID int64, userIDs []int64) error {
+	isMember, err := u.d.Groups.IsMember(ctx, groupID, inviterID)
+	if err != nil {
+		return apperror.Wrap(apperror.CodeInternal, "邀请成员失败", err)
+	}
+	if !isMember {
+		return apperror.New(apperror.CodeNotGroupMember, domain.ErrNotGroupMember.Error())
+	}
+	added := make([]int64, 0, len(userIDs))
+	for _, uid := range userIDs {
+		if uid == inviterID {
+			continue
+		}
+		if _, err := u.d.Users.ByID(ctx, uid); err != nil {
+			if errors.Is(err, domain.ErrUserNotFound) {
+				continue // 不存在的用户静默跳过
+			}
+			return apperror.Wrap(apperror.CodeInternal, "邀请成员失败", err)
+		}
+		already, err := u.d.Groups.IsMember(ctx, groupID, uid)
+		if err != nil {
+			return apperror.Wrap(apperror.CodeInternal, "邀请成员失败", err)
+		}
+		if already {
+			continue
+		}
+		if err := u.d.Groups.Join(ctx, groupID, uid); err != nil {
+			return apperror.Wrap(apperror.CodeInternal, "邀请成员失败", err)
+		}
+		added = append(added, uid)
+	}
+	if len(added) > 0 {
+		// 通知全体老成员 + 新成员刷新群列表
+		ids, err := u.d.Groups.MemberIDs(ctx, groupID)
+		if err == nil {
+			u.d.Notifier.ToUsers(ctx, ids, port.NotifierEvent{
+				Event: "group.updated", Data: map[string]any{"group_id": groupID},
+			})
+		}
 	}
 	return nil
 }

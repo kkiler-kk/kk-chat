@@ -30,6 +30,7 @@ type FriendUseCase interface {
 type GroupUseCase interface {
 	Create(ctx context.Context, ownerID int64, in CreateGroupInput) (*GroupItem, error)
 	Join(ctx context.Context, groupID, userID int64) error
+	Invite(ctx context.Context, inviterID, groupID int64, userIDs []int64) error
 	List(ctx context.Context, userID int64) ([]GroupItem, error)
 	Search(ctx context.Context, keyword string) ([]GroupItem, error)
 }

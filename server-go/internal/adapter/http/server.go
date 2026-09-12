@@ -79,6 +79,7 @@ func NewServer(d ServerDeps) *echo.Echo {
 	// 群组（GET /groups?search=xx 走搜索，见 handler）
 	v1.POST("/groups", groupH.Create, jwtMW)
 	v1.POST("/groups/:id/members", groupH.Join, jwtMW)
+	v1.POST("/groups/:id/invite", groupH.Invite, jwtMW)
 	v1.GET("/groups", groupH.List, jwtMW)
 
 	// 聊天

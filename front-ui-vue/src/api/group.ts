@@ -12,6 +12,9 @@ export const create = (p: CreateGroupParams) =>
 export const join = (id: number) =>
   request<null>({ url: `/api/v1/groups/${id}/members`, method: 'POST' })
 
+export const invite = (id: number, userIds: number[]) =>
+  request<null>({ url: `/api/v1/groups/${id}/invite`, method: 'POST', data: { user_ids: userIds } })
+
 export const list = () => request<GroupItem[]>({ url: '/api/v1/groups', method: 'GET' })
 
 export const search = (keyword: string) =>

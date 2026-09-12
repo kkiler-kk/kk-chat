@@ -90,7 +90,7 @@ func main() {
 	})
 	userUC := usecase.NewUser(usecase.UserDeps{Users: userRepo, Friends: friendRepo, Codes: codeStore})
 	friendUC := usecase.NewFriend(usecase.FriendDeps{Users: userRepo, Friends: friendRepo, Presence: presenceStore})
-	groupUC := usecase.NewGroup(usecase.GroupDeps{Groups: groupRepo, Notifier: notifier, Clock: clk})
+	groupUC := usecase.NewGroup(usecase.GroupDeps{Groups: groupRepo, Users: userRepo, Notifier: notifier, Clock: clk})
 	presenceUC := usecase.NewPresence(usecase.PresenceDeps{
 		Presence: presenceStore, Friends: friendRepo, Notifier: notifier,
 		TTL: time.Duration(cfg.Presence.TTLSeconds) * time.Second,

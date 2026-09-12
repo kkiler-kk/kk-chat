@@ -57,10 +57,10 @@ async function addFriend() {
         <div class="row">注册于 {{ formatTime(detail.created_at, 'YYYY-MM-DD') }}</div>
       </div>
       <div class="ops">
-        <a-button v-if="!detail.is_friend && !detail.is_self" type="primary" @click="addFriend">
+        <a-button v-if="!detail.is_friend && !detail.is_self" @click="addFriend">
           添加好友
         </a-button>
-        <a-button v-else-if="!detail.is_self" type="primary" @click="emit('go-chat', detail)">
+        <a-button v-if="!detail.is_self" type="primary" @click="emit('go-chat', detail)">
           发消息
         </a-button>
       </div>
@@ -91,5 +91,6 @@ async function addFriend() {
 .ops {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
 }
 </style>

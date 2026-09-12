@@ -46,6 +46,26 @@ func (h *Group) Join(c echo.Context) error {
 	return dto.OK(c, nil)
 }
 
+// Invite 群成员邀请新成员：POST /groups/:id/invite {user_ids: []}
+func (h *Group) Invite(c echo.Context) error {
+	gid, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil || gid <= 0 {
+		return apperror.New(apperror.CodeInvalidParam, "传入错误群id")
+	}
+	var req dto.InviteReq
+	if err := c.Bind(&req); err != nil {
+		return apperror.New(apperror.CodeInvalidParam, "请求体格式错误")
+	}
+	if err := dto.Validate(&req); err != nil {
+		return err
+	}
+	uid, _ := middleware.UserIDFromContext(c.Request().Context())
+	if err := h.uc.Invite(c.Request().Context(), uid, gid, req.UserIDs); err != nil {
+		return err
+	}
+	return dto.OK(c, nil)
+}
+
 // List 带 ?search=xx 时走搜索（spec §3.1 GET /groups?search=xx）。
 func (h *Group) List(c echo.Context) error {
 	ctx := c.Request().Context()
