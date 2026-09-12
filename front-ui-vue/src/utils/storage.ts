@@ -1,63 +1,38 @@
-import Cookies from 'js-cookie';
+const PREFIX = 'kk:'
 
-/**
- * window.localStorage 浏览器永久缓存
- * @method set 设置永久缓存
- * @method get 获取永久缓存
- * @method remove 移除永久缓存
- * @method clear 移除全部永久缓存
- */
-export const Local = {
-	// 设置永久缓存
-	set(key: string, val: any) {
-		if (key === 'token') return Cookies.set(key, val);
-		window.localStorage.setItem(key, JSON.stringify(val));
-	},
-	// 获取永久缓存
-	get(key: string) {
-		if (key === 'token') return Cookies.get(key);
-		let json: any = window.localStorage.getItem(key);
-		return JSON.parse(json);
-	},
-	// 移除永久缓存
-	remove(key: string) {
-		if (key === 'token') return Cookies.remove(key);
-		window.localStorage.removeItem(key);
-	},
-	// 移除全部永久缓存
-	clear() {
-		Cookies.remove('token');
-		window.localStorage.clear();
-	},
-};
+function createStorage(engine: Storage) {
+  return {
+    get<T>(key: string): T | null {
+      const raw = engine.getItem(PREFIX + key)
+      if (raw === null) return null
+      try {
+        return JSON.parse(raw) as T
+      } catch {
+        return null
+      }
+    },
+    set<T>(key: string, value: T): void {
+      engine.setItem(PREFIX + key, JSON.stringify(value))
+    },
+    remove(key: string): void {
+      engine.removeItem(PREFIX + key)
+    },
+    clear(): void {
+      // 只清理本应用前缀键，避免误伤同域其他数据
+      const keys: string[] = []
+      for (let i = 0; i < engine.length; i++) {
+        const k = engine.key(i)
+        if (k && k.startsWith(PREFIX)) keys.push(k)
+      }
+      keys.forEach((k) => engine.removeItem(k))
+    },
+  }
+}
 
-/**
- * window.sessionStorage 浏览器临时缓存
- * @method set 设置临时缓存
- * @method get 获取临时缓存
- * @method remove 移除临时缓存
- * @method clear 移除全部临时缓存
- */
-export const Session = {
-	// 设置临时缓存
-	set(key: string, val: any) {
-		if (key === 'token') return Cookies.set(key, val);
-		window.sessionStorage.setItem(key, JSON.stringify(val));
-	},
-	// 获取临时缓存
-	get(key: string) {
-		if (key === 'token') return Cookies.get(key);
-		let json: any = window.sessionStorage.getItem(key);
-		return JSON.parse(json);
-	},
-	// 移除临时缓存
-	remove(key: string) {
-		if (key === 'token') return Cookies.remove(key);
-		window.sessionStorage.removeItem(key);
-	},
-	// 移除全部临时缓存
-	clear() {
-		Cookies.remove('token');
-		window.sessionStorage.clear();
-	},
-};
+export const Local = createStorage(localStorage)
+export const Session = createStorage(sessionStorage)
+
+export const StorageKeys = {
+  token: 'token',
+  userInfo: 'userInfo',
+} as const
