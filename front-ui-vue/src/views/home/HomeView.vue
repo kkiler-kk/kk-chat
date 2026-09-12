@@ -4,6 +4,9 @@ import SideNav from './components/SideNav.vue'
 import TheHeader from './components/TheHeader.vue'
 import ConversationList from './components/ConversationList.vue'
 import ChatWindow from './components/ChatWindow.vue'
+import ContactsPanel from './components/ContactsPanel.vue'
+import GroupsPanel from './components/GroupsPanel.vue'
+import SettingsPanel from './components/SettingsPanel.vue'
 import type { PanelKey } from './types'
 import { useChatStore } from '@/stores/chat'
 import { useContactsStore } from '@/stores/contacts'
@@ -30,6 +33,12 @@ const panelTitle = computed(() => {
 onMounted(() => {
   void Promise.all([chat.loadConversations(), contacts.loadFriends(), contacts.loadGroups()])
 })
+
+/** 联系人/群组面板点击聊天 → 打开会话并切回消息面板 */
+async function goChat(convId: string) {
+  await chat.openConversation(convId)
+  activePanel.value = 'chats'
+}
 </script>
 
 <template>
@@ -38,7 +47,9 @@ onMounted(() => {
     <div class="middle">
       <TheHeader :title="panelTitle" />
       <ConversationList v-if="activePanel === 'chats'" />
-      <div v-else class="panel-stub">「{{ panelTitle }}」面板见 Task F9</div>
+      <ContactsPanel v-else-if="activePanel === 'contacts'" @go-chat="goChat" />
+      <GroupsPanel v-else-if="activePanel === 'groups'" @go-chat="goChat" />
+      <SettingsPanel v-else-if="activePanel === 'settings'" />
     </div>
     <ChatWindow />
   </div>
@@ -59,13 +70,5 @@ onMounted(() => {
   flex-direction: column;
   background: #fff;
   border-right: 1px solid #f0f0f0;
-}
-
-.panel-stub {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #999;
 }
 </style>
