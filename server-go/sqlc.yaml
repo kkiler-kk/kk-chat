@@ -1,0 +1,9 @@
+version: "2"
+sql:
+  - engine: "mysql"
+    queries: "internal/adapter/persistence/mysql/query"
+    schema: "migrations/schema.sql"
+    gen:
+      go:
+        package: "sqlcgen"
+        out: "internal/adapter/persistence/mysql/sqlcgen"
