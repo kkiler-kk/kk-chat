@@ -1,0 +1,44 @@
+[server]
+port = 8080
+mode = "debug"          # debug | release
+static_path = "static"
+
+[mysql]
+host = "127.0.0.1"
+port = 3306
+user = "root"
+password = ""
+dbname = "kk_chat"
+
+[redis]
+addr = "127.0.0.1:6379"
+password = ""
+db = 0
+
+[mongo]
+uri = "mongodb://127.0.0.1:27017"
+database = "kk_chat"
+
+[jwt]
+secret = "change-me-in-production"
+ttl_minutes = 720
+
+[email]
+host = "smtp.example.com"
+port = 465
+username = ""
+password = ""
+from = ""
+
+[message]
+retention_days = 90
+non_friend_limit = 3
+limit_ttl_hours = 24
+
+[presence]
+ttl_seconds = 120
+heartbeat_seconds = 60
+
+[log]
+level = "info"
+pretty = true
