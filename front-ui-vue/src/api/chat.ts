@@ -15,7 +15,8 @@ export const conversations = () =>
 
 export const history = (convId: string, cursor?: string, limit = 50) =>
   request<OutgoingMessage[]>({
-    url: `/api/v1/conversations/${encodeURIComponent(convId)}/messages`,
+    // convId 形如 u:1_2 / g:1，冒号是合法路径字符，不可 encode（Echo 不解码路由参数）
+    url: `/api/v1/conversations/${convId}/messages`,
     method: 'GET',
     params: { cursor, limit },
   })
