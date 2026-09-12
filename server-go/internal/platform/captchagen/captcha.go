@@ -18,8 +18,15 @@ func New() *Generator {
 }
 
 func (g *Generator) Generate(_ context.Context) (id, answer, b64Image string, err error) {
-	// DriverDigit 的 GenerateIdQuestionAnswer 返回 (id, base64图片, 答案)
-	id, b64Image, answer = g.driver.GenerateIdQuestionAnswer()
+	// GenerateIdQuestionAnswer 只生成 (id, 题目文本, 答案)，不渲染图片；
+	// 必须再调 DrawCaptcha 绘制并编码为 data URI（与 base64Captcha.Captcha.Generate 流程一致）。
+	var q string
+	id, q, answer = g.driver.GenerateIdQuestionAnswer()
+	var item base64Captcha.Item
+	if item, err = g.driver.DrawCaptcha(q); err != nil {
+		return
+	}
+	b64Image = item.EncodeB64string()
 	return
 }
 

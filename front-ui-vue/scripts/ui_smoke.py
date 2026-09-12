@@ -40,6 +40,8 @@ with sync_playwright() as p:
     page.screenshot(path="/tmp/ui-1-login.png")
     check("登录页品牌渲染", page.locator(".brand").inner_text() == "kk-chat")
     check("图形验证码已加载", page.locator(".captcha-img").count() == 1)
+    img_rendered = page.evaluate("() => { const i = document.querySelector('.captcha-img'); return !!i && i.naturalWidth > 0 && i.src.startsWith('data:image') }")
+    check("图形验证码图片真实渲染(naturalWidth>0)", bool(img_rendered))
 
     # 2. 登录 kk002
     answer = get_captcha_answer()
