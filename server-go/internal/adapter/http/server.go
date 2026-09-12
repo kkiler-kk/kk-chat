@@ -35,12 +35,12 @@ func NewServer(d ServerDeps) *echo.Echo {
 	e.Debug = d.Cfg.Server.Mode == "debug"
 
 	// 中间件链（顺序敏感）：
-	// RequestID(最外，先生成 id) → ErrorHandler(捕获内层所有错误) → Recover(panic→apperror 传回外层)
-	// → RequestLogger(访问日志) → CORS
+	// RequestID(最外，先生成 id) → RequestLogger(next 返回后记录最终状态码)
+	// → ErrorHandler(捕获内层所有错误并渲染) → Recover(panic→apperror 传回外层) → CORS
 	e.Use(echoMiddleware.RequestID())
+	e.Use(middleware.RequestLogger(d.Logger))
 	e.Use(middleware.ErrorHandler(d.Logger))
 	e.Use(middleware.Recover(d.Logger))
-	e.Use(middleware.RequestLogger(d.Logger))
 	e.Use(echoMiddleware.CORSWithConfig(echoMiddleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"},
