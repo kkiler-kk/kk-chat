@@ -1,15 +1,16 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-</script>
+<script setup lang="ts"></script>
 
-<template class="app-view">
+<template>
   <RouterView />
 </template>
 
-<style scoped>
-.app-view {
-  position: relative;
+<style>
+html,
+body,
+#app {
   width: 100%;
   height: 100%;
+  margin: 0;
+  padding: 0;
 }
 </style>
