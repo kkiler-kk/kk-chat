@@ -1,0 +1,1 @@
+cd front-ui-vue && npx lint-staged

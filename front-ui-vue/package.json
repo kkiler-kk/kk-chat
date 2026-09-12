@@ -4,47 +4,54 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite serve --mode development",
-    "test": "vite serve --mode testenvironment",
-    "prod": "vite serve --mode production",
+    "dev": "vite --mode development",
     "build": "run-p type-check \"build-only {@}\" --",
-    "preview": "vite preview",
-    "test:unit": "vitest",
     "build-only": "vite build",
+    "preview": "vite preview",
     "type-check": "vue-tsc --build --force",
-    "build:test": "vite build --mode testenvironment",
-    "build:prod": "vite build --mode production"
+    "lint": "eslint . --fix",
+    "format": "prettier --write src/"
   },
   "dependencies": {
-    "@ant-design/icons-vue": "^6.0.1",
-    "ant-design-vue": "^3.2.11",
-    "axios": "^1.6.8",
-    "emoji-mart-vue": "^2.6.6",
-    "js-pinyin": "^0.2.5",
-    "pinia": "^2.1.7",
+    "@ant-design/icons-vue": "^7",
+    "ant-design-vue": "^4",
+    "axios": "^1",
+    "pinia": "^2",
     "qs": "^6.12.0",
-    "unplugin-vue-components": "^0.26.0",
-    "v-emoji-picker": "^2.3.3",
-    "vue": "^3.4.21",
-    "vue-router": "^4.3.0",
-    "vue3-emoji-picker": "^1.1.8",
-    "vuex": "^4.1.0"
+    "vue": "^3.5",
+    "vue-router": "^4",
+    "vue3-emoji-picker": "^1"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.2",
-    "@types/jsdom": "^21.1.6",
-    "@types/node": "^20.11.25",
-    "@vitejs/plugin-vue": "^5.0.4",
+    "@typescript-eslint/eslint-plugin": "^8.70.0",
+    "@typescript-eslint/parser": "^8.70.0",
+    "@vitejs/plugin-vue": "^5",
     "@vitejs/plugin-vue-jsx": "^3.1.0",
-    "@vue/test-utils": "^2.4.4",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "@vue/eslint-config-typescript": "^14.9.0",
     "@vue/tsconfig": "^0.5.1",
-    "jsdom": "^24.0.0",
+    "eslint": "^9",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "eslint-plugin-vue": "^9",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.5.1",
     "npm-run-all2": "^6.1.2",
-    "scss": "^0.2.4",
-    "typescript": "~5.4.0",
-    "vite": "^5.1.5",
-    "vitest": "^1.3.1",
-    "vue-tsc": "^2.0.6"
+    "prettier": "^3.9.6",
+    "typescript": "~5.6",
+    "vite": "^6",
+    "vue-eslint-parser": "^10.4.1",
+    "vue-tsc": "^2"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,vue}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "src/**/*.{css,scss,json,md}": [
+      "prettier --write"
+    ]
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
