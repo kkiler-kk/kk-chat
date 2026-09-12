@@ -1,148 +1,132 @@
-<template>
-  <div class="box">
-    <a-form
-      :model="formState"
-      name="basic"
-      autocomplete="off"
-      @finish="onFinish"
-      @finishFailed="onFinishFailed"
-    >
-      <a-form-item
-        label="用户名"
-        name="username"
-        :rules="[{ required: true, message: '请输入用户名!' }]"
-      >
-        <a-input
-          v-model:value="formState.username"
-          class="input"
-          placeholder="请输入用户名"
-        />
-      </a-form-item>
-      <a-form-item
-        label="ID"
-        name="identity"
-        :rules="[{ required: true, message: '请输入ID!' }]"
-      >
-        <a-input
-          v-model:value="formState.identity"
-          class="input"
-          placeholder="请输入ID"
-        />
-      </a-form-item>
-      <a-form-item
-        label="邮箱"
-        name="email"
-        :rules="[{ required: true, message: '请输入邮箱!', pattern: /^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/,}]"
-      >
-        <a-input
-          v-model:value="formState.email"
-          class="input"
-          placeholder="请输入邮箱地址"
-        />
-      </a-form-item>
+<script setup lang="ts">
+import { onUnmounted, reactive, ref } from 'vue'
+import { message } from 'ant-design-vue'
+import * as authApi from '@/api/auth'
+import { useAuthStore } from '@/stores/auth'
+import type { FormInstance } from 'ant-design-vue'
 
-      <a-form-item
-        label="验证码"
-        name="verificationCode"
-        :rules="[{ required: true, message: '请输入验证码!' }]"
-      >
-        <a-input
-          v-model:value="formState.verificationCode"
-          class="verificationCode"
-          placeholder="请输入验证码"
-        />
-        <a-button style="margin-left: 10px" @click="sendEmail">发送</a-button>
-      </a-form-item>
-      <a-form-item
-        label="密码"
-        name="oldPassword"
-        :rules="[{ required: true, message: '请输入密码!' }]"
-      >
-        <a-input-password
-          v-model:value="formState.oldPassword"
-          class="input"
-          placeholder="请输入密码"
-        />
-      </a-form-item>
-      <a-form-item
-        label="密码"
-        name="newPassword"
-        :rules="[{ required: true, message: '请输入密码!' }]"
-      >
-        <a-input-password
-          v-model:value="formState.newPassword"
-          class="input"
-          placeholder="请再次输入密码"
-        />
-      </a-form-item>
+const emit = defineEmits<{ registered: [] }>()
 
-      <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-        <a-button type="primary" html-type="submit" style="width: 50%">注 册</a-button>
-      </a-form-item>
-    </a-form>
-  </div>
-</template>
-<script lang="ts" setup>
-import { reactive, ref } from "vue";
-import { message } from 'ant-design-vue';
-import { sendEmailCode } from "@/api/auth/auth.ts";
-import {createUserBasic} from '@/api/userBasic/userBasic.ts'
-interface FormState {
-  username: string;
-  oldPassword: string;
-  newPassword: string;
-  identity: string;
-  email: string;
-  verificationCode: string; // 邮箱验证码
+const auth = useAuthStore()
+const formRef = ref<FormInstance>()
+const loading = ref(false)
+const countdown = ref(0)
+let timer: ReturnType<typeof setInterval> | null = null
+
+const form = reactive({
+  identity: '',
+  name: '',
+  password: '',
+  confirmPassword: '',
+  email: '',
+  email_code: '',
+})
+
+const rules = {
+  identity: [
+    { required: true, message: '请输入唯一账号' },
+    { min: 3, max: 32, message: '账号长度 3-32 位' },
+  ],
+  name: [{ required: true, message: '请输入昵称' }],
+  password: [
+    { required: true, message: '请输入密码' },
+    { min: 6, max: 64, message: '密码长度 6-64 位' },
+  ],
+  confirmPassword: [
+    { required: true, message: '请确认密码' },
+    {
+      validator: (_rule: unknown, value: string) =>
+        value === form.password
+          ? Promise.resolve()
+          : Promise.reject(new Error('两次输入的密码不一致')),
+    },
+  ],
+  email: [
+    { required: true, message: '请输入邮箱' },
+    { type: 'email' as const, message: '邮箱格式不正确' },
+  ],
+  email_code: [
+    { required: true, message: '请输入邮箱验证码' },
+    { len: 6, message: '验证码为 6 位数字' },
+  ],
 }
 
-const formState = reactive<FormState>({
-  username: "",
-  oldPassword: "",
-  newPassword: "",
-  identity: "",
-  email: "",
-  verificationCode: "",
-});
-const onFinish = (values: any) => {
-  console.log("Success:", values);
-  createUserBasic(formState).then((res) => {
-    message.success("注册成功！")
-  }).catch((err) => {
-    console.log('error', err)
-    message.error("添加失败", err)
-  })
-};
+async function sendCode() {
+  if (!form.email) {
+    message.warning('请先填写邮箱')
+    return
+  }
+  await authApi.sendEmailCode(form.email)
+  message.success('验证码已发送')
+  countdown.value = 60
+  timer = setInterval(() => {
+    countdown.value--
+    if (countdown.value <= 0 && timer) {
+      clearInterval(timer)
+      timer = null
+    }
+  }, 1000)
+}
 
-const onFinishFailed = (errorInfo: any) => {
-};
-const sendEmail = () => {
-  sendEmailCode(formState.email)
-    .then((res) => {
-      message.success("发送成功！请留意邮箱")
+async function onSubmit() {
+  try {
+    await formRef.value?.validate()
+  } catch {
+    return
+  }
+  loading.value = true
+  try {
+    await auth.register({
+      identity: form.identity,
+      name: form.name,
+      password: form.password,
+      email: form.email,
+      email_code: form.email_code,
     })
-    .catch((error) => {
-      console.log('err', error);
-    });
-};
+    message.success('注册成功，请登录')
+    emit('registered')
+  } finally {
+    loading.value = false
+  }
+}
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+})
 </script>
+
+<template>
+  <a-form ref="formRef" :model="form" :rules="rules" layout="vertical" @finish="onSubmit">
+    <a-form-item label="唯一账号" name="identity">
+      <a-input v-model:value="form.identity" placeholder="登录用账号（3-32位）" />
+    </a-form-item>
+    <a-form-item label="昵称" name="name">
+      <a-input v-model:value="form.name" placeholder="显示昵称" />
+    </a-form-item>
+    <a-form-item label="密码" name="password">
+      <a-input-password v-model:value="form.password" placeholder="密码（6-64位）" />
+    </a-form-item>
+    <a-form-item label="确认密码" name="confirmPassword">
+      <a-input-password v-model:value="form.confirmPassword" placeholder="再次输入密码" />
+    </a-form-item>
+    <a-form-item label="邮箱" name="email">
+      <a-input v-model:value="form.email" placeholder="邮箱" />
+    </a-form-item>
+    <a-form-item label="邮箱验证码" name="email_code">
+      <div class="code-row">
+        <a-input v-model:value="form.email_code" placeholder="6 位验证码" :maxlength="6" />
+        <a-button :disabled="countdown > 0" @click="sendCode">
+          {{ countdown > 0 ? `${countdown}s 后重发` : '发送验证码' }}
+        </a-button>
+      </div>
+    </a-form-item>
+    <a-button type="primary" html-type="submit" block :loading="loading"> 注册 </a-button>
+  </a-form>
+</template>
+
 <style scoped>
-.text {
-  color: rgb(0, 89, 128);
-}
-.ant-form {
-  width: 100%;
-  height: 100%;
-}
-.box {
-  width: 80%;
-  position: relative;
-  left: 10%;
-}
-.input {
-  width: 80%;
-}
-.verificationCode {
-  width: 50%;
+.code-row {
+  display: flex;
+  gap: 8px;
 }
 </style>

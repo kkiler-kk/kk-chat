@@ -1,137 +1,110 @@
-<template>
-  <div class="box">
-    <a-form :model="formState" name="basic" @finish="onFinish" @finishFailed="onFinishFailed">
-      <a-form-item label="" name="username" :rules="[{ required: true, message: '请输入邮箱/手机号/id' }]">
-        <a-input v-model:value="formState.username" class="input" placeholder="邮箱/手机号/ID">
-          <template #prefix>
-            <UserOutlined style="color: rgba(0, 0, 0, 0.25)" />
-          </template>
-        </a-input>
-      </a-form-item>
+<script setup lang="ts">
+import { onMounted, reactive, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import * as authApi from '@/api/auth'
+import { ApiError } from '@/api/client'
+import { useAuthStore } from '@/stores/auth'
+import { ErrCode } from '@/types/errorcode'
+import type { FormInstance } from 'ant-design-vue'
 
-      <a-form-item label="" name="password" :rules="[{ required: true, message: '请输入密码!' }]">
-        <a-input-password v-model:value="formState.password" class="input" placeholder="请输入密码">
-          <template #prefix>
-            <LockOutlined style="color: rgba(0, 0, 0, 0.25)" />
-          </template>
-        </a-input-password>
-      </a-form-item>
-      <a-form-item label="" name="code.answer">
-        <a-input v-model:value="formState.code.answer" class="verificationCode" placeholder="请输入验证码" />
-        <img style="margin-left: 10px" @click="getCaptchaGenerate" :src="formState.code.data" />
-        <div>
-        </div>
-      </a-form-item>
-      <a-form-item name="remember">
-        <a-checkbox v-model:checked="formState.remember" style="float: left;">记住我</a-checkbox>
-        <span @click="isLoginModel = !isLoginModel" class="text" style="float: right;">{{
-          isLoginModel ? "短信验证登录" : "用户名密码登录"
-          }}</span>
-      </a-form-item>
+const router = useRouter()
+const route = useRoute()
+const auth = useAuthStore()
 
-      <a-form-item>
-        <a-button type="primary" html-type="submit" style="width: 100%; margin: 0 auto;" :loading="loginLoading">登
-          录</a-button>
-      </a-form-item>
-      <span class="text" style="text-align: center;">已有账号，忘记密码?</span>
-    </a-form>
-    <div>
-      <a-divider>其他方式登录</a-divider>
-      <a-space style="padding-left: 24%;">
-        <GithubOutlined :style="{fontSize: fontSizeVar, color: 'rgb(23, 133, 255)'}"/>
-        <WechatOutlined :style="{fontSize: fontSizeVar, color: 'rgb(23, 133, 255)'}"/>
-        <QqOutlined  :style="{fontSize: fontSizeVar, color: 'rgb(23, 133, 255)'}"/>
-        <AlipayOutlined  :style="{fontSize: fontSizeVar, color: 'rgb(23, 133, 255)'}"/>
-      </a-space>
-    </div>
+const formRef = ref<FormInstance>()
+const loading = ref(false)
+const captchaId = ref('')
+const captchaImage = ref('')
 
-  </div>
-</template>
-<script lang="ts" setup>
-import { reactive, ref, onMounted } from "vue";
-import { UserOutlined, LockOutlined,GithubOutlined,QqOutlined,WechatOutlined,AlipayOutlined } from '@ant-design/icons-vue';
-import { captchaGenerate } from '@/api/auth/auth'
-import { login } from '@/api/userBasic/userBasic'
-import { Local } from '@/utils/storage';
-import router from "@/router";
-interface FormState {
-  username: string;
-  password: string;
-  remember: boolean;
-  code: CaptchaGenerateMode;
-}
-interface CaptchaGenerateMode {
-  captchaId: string;
-  data: string;
-  answer: string;
-}
-const isLoginModel = ref(true);
-const loginLoading = ref(false);
-const formState = reactive<FormState>({
-  username: "",
-  password: "",
-  remember: true,
-  code: {
-    captchaId: '',
-    data: '',
-    answer: ''
-  }
-});
-const fontSizeVar = ref("35px")
-const onFinish = (values: any) => {
-  loginLoading.value = true
-  login(formState).then((res: any) => {
-    Local.set('token', res.token)
-    Local.set('userInfo', res.user)  // 将信息载入浏览器本地缓存
-    loginLoading.value = false
-    setTimeout(() => {
-      router.push({
-        name: "Home",
-      });
-    }, 200);
-  }).catch((err) => {
-    getCaptchaGenerate() // 刷新验证码
-    loginLoading.value = false
-  })
-};
-
-const onFinishFailed = (errorInfo: any) => {
-  console.log("Failed:", errorInfo);
-};
-onMounted(() => {
-  getCaptchaGenerate()
+const form = reactive({
+  account: '',
+  password: '',
+  captcha_answer: '',
 })
-const getCaptchaGenerate = () => {
-  captchaGenerate().then((res) => {
-    formState.code = {
-      captchaId: res.captchaId,
-      data: res.data
+
+const rules = {
+  account: [{ required: true, message: '请输入账号或邮箱' }],
+  password: [{ required: true, message: '请输入密码' }],
+  captcha_answer: [{ required: true, message: '请输入图形验证码' }],
+}
+
+async function refreshCaptcha() {
+  const res = await authApi.getCaptcha()
+  captchaId.value = res.captcha_id
+  captchaImage.value = res.image
+  form.captcha_answer = ''
+}
+
+async function onSubmit() {
+  try {
+    await formRef.value?.validate()
+  } catch {
+    return
+  }
+  loading.value = true
+  try {
+    await auth.login(form.account, form.password, captchaId.value, form.captcha_answer)
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/home'
+    await router.push(redirect)
+  } catch (e) {
+    // 验证码错误/密码错误 → 刷新图形验证码
+    if (
+      e instanceof ApiError &&
+      (e.code === ErrCode.CaptchaInvalid || e.code === ErrCode.BadCredentials)
+    ) {
+      await refreshCaptcha()
     }
-  })
+  } finally {
+    loading.value = false
+  }
 }
+
+onMounted(refreshCaptcha)
 </script>
+
+<template>
+  <a-form ref="formRef" :model="form" :rules="rules" layout="vertical" @finish="onSubmit">
+    <a-form-item label="账号 / 邮箱" name="account">
+      <a-input v-model:value="form.account" placeholder="identity 或邮箱" size="large" />
+    </a-form-item>
+    <a-form-item label="密码" name="password">
+      <a-input-password v-model:value="form.password" placeholder="密码" size="large" />
+    </a-form-item>
+    <a-form-item label="图形验证码" name="captcha_answer">
+      <div class="captcha-row">
+        <a-input
+          v-model:value="form.captcha_answer"
+          placeholder="验证码"
+          size="large"
+          :maxlength="4"
+        />
+        <img
+          v-if="captchaImage"
+          :src="captchaImage"
+          class="captcha-img"
+          title="点击刷新"
+          alt="captcha"
+          @click="refreshCaptcha"
+        />
+      </div>
+    </a-form-item>
+    <a-button type="primary" html-type="submit" size="large" block :loading="loading">
+      登录
+    </a-button>
+  </a-form>
+</template>
+
 <style scoped>
-.text {
-  color: rgb(0, 89, 128);
+.captcha-row {
+  display: flex;
+  gap: 8px;
+}
+
+.captcha-img {
+  height: 40px;
+  width: 120px;
+  border-radius: 6px;
   cursor: pointer;
-}
-
-.ant-form {
-  width: 100%;
-  height: 100%;
-}
-
-.box {
-  width: 80%;
-  position: relative;
-  left: 10%;
-}
-
-.input {
-  width: 90%;
-}
-
-.verificationCode {
-  width: 50%;
+  border: 1px solid #d9d9d9;
 }
 </style>
